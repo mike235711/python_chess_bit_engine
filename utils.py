@@ -1,5 +1,17 @@
 import numpy as np
 
+def has_one_one(n):
+    count = 0
+    while n:
+        n &= (n - 1)  # Flip the least significant 1 bit of n to 0
+        count += 1
+        if count > 1:
+            return False
+    if count == 1:
+        return True
+    return False
+
+
 def get_set_bit_indices(bit):
     # Get the indices of the ones in a bit
     indices = []
@@ -30,7 +42,7 @@ def board_to_bitboards(board):
     dict: A dictionary of bitboards for each piece type.
     """
     # Define piece types
-    pieces = ['wP', 'wN', 'wB', 'wR', 'wQ', 'wK', 'p', 'n', 'b', 'r', 'q', 'k']
+    pieces = ['wP', 'wN', 'wB', 'wR', 'wQ', 'wK', 'bP', 'bN', 'bB', 'bR', 'bQ', 'bK']
 
     # Initialize bitboards
     bitboards = {piece: 0 for piece in pieces}
@@ -50,8 +62,8 @@ def bitboards_to_board(bitboards, turn):
     list: A list of 64 characters representing the board state.
     """
     # Create an empty board
-    pieces_1 = ['wP', 'wN', 'wB', 'wR', 'wQ', 'wK', 'p', 'n', 'b', 'r', 'q', 'k']
-    pieces_2 = ['p', 'n', 'b', 'r', 'q', 'k', 'wP', 'wN', 'wB', 'wR', 'wQ', 'wK']
+    pieces_1 = ['wP', 'wN', 'wB', 'wR', 'wQ', 'wK', 'bP', 'bN', 'bB', 'bR', 'bQ', 'bK']
+    pieces_2 = ['bP', 'bN', 'bB', 'bR', 'bQ', 'bK', 'wP', 'wN', 'wB', 'wR', 'wQ', 'wK']
     board = ['0'] * 64
     if turn:
         for piece_index, bitboard in enumerate(bitboards): # w_pawns, w_knights, w_bishops, w_rooks, w_queens, w_king, ...
