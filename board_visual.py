@@ -1,18 +1,9 @@
 import pygame
 import sys
+import time
 
 from BitPosition import Move, BitPosition
 from utils import board_to_bitboards, bitboards_to_board
-
-# Example move generator function (replace with your actual function)
-def generate_valid_moves(position):
-    non_capture_moves = position.non_capture_moves()
-    capture_moves = position.capture_moves()
-    return list(non_capture_moves) + list(capture_moves)
-
-def generate_valid_moves_in_check(position):
-    in_check_moves = position.in_check_moves()
-    return list(in_check_moves)
 
 def draw_board(screen, board, dragged_piece, mouse_pos):
     colors = [pygame.Color("white"), pygame.Color("gray")]
@@ -26,7 +17,7 @@ def draw_board(screen, board, dragged_piece, mouse_pos):
         for col in range(8):
             color = colors[(row + col) % 2]
             pygame.draw.rect(screen, color, (col*square_size, row*square_size, square_size, square_size))
-            piece = board[row * 8 + col]
+            piece = board[(7-row) * 8 + col]
             if piece != '0':
                 piece_image = piece
                 screen.blit(pieces_images[piece_image], (col*square_size, row*square_size))
@@ -46,7 +37,7 @@ def load_pieces_images(square_size):
 
 def get_square_at_pos(pos, square_size):
     x, y = pos
-    row = y // square_size
+    row = 7 - y // square_size
     col = x // square_size
     return row, col
 
@@ -69,7 +60,30 @@ def draw_promotion_menu(screen, square_size, color):
 
     return pieces, menu_x, menu_y  # Return the menu position for mouse click handling
 
+def play_and_undo_moves(position, depth, screen, square_size, pieces_images, board, promoting, promotion_color):
+    if depth == 0:
+        return
 
+    if not position.is_check():
+        valid_moves = list(position.capture_moves()) + list(position.non_capture_moves())
+    else:
+        valid_moves = list(position.in_check_captures()) + list(position.in_check_moves())
+
+    for move in valid_moves:
+        position.move(move)
+        updated_board = bitboards_to_board(position.bitboard)
+        draw_board(screen, updated_board, None, (0, 0))
+        pygame.display.flip()
+        time.sleep(0.001)  # Wait for 1 second
+
+        # Recursive call to the next depth
+        play_and_undo_moves(position, depth - 1, screen, square_size, pieces_images, updated_board, promoting, promotion_color)
+
+        position.unmake_move(move)
+        draw_board(screen, board, None, (0, 0))
+        pygame.display.flip()
+
+move_history = []
 
 def main():
     pygame.init()
@@ -91,18 +105,18 @@ def main():
 
     # Define the initial board state
     board = [
-        'wR', 'wN', 'wB', 'wK', 'wQ', 'wB', 'wN', 'wR',
+        'wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR',
         'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP',
         '0', '0', '0', '0', '0', '0', '0', '0',
         '0', '0', '0', '0', '0', '0', '0', '0',
         '0', '0', '0', '0', '0', '0', '0', '0',
         '0', '0', '0', '0', '0', '0', '0', '0',
         'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP',
-        'bR', 'bN', 'bB', 'bK', 'bQ', 'bB', 'bN', 'bR'
+        'bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'
     ]
 
     pieces_images = load_pieces_images(square_size)
-    position = BitPosition(board_to_bitboards(board), -1, wc=[True, True], bc=[True, True], turn=True)
+    position = BitPosition(board_to_bitboards(board), turn=True)
 
     while True:
         mouse_pos = pygame.mouse.get_pos()
@@ -111,14 +125,16 @@ def main():
             if e.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif e.type == pygame.MOUSEBUTTONDOWN:
+
+            elif e.type == pygame.MOUSEBUTTONDOWN: # Left click down
                 print(position.bitboard)
                 selected_pos = get_square_at_pos(mouse_pos, square_size)
                 selected_piece = board[selected_pos[0] * 8 + selected_pos[1]]
                 if selected_piece != '0':
                     dragged_piece = (pieces_images[selected_piece], pieces_images[selected_piece].get_rect(topleft=mouse_pos))
                     board[selected_pos[0] * 8 + selected_pos[1]] = '0'
-            elif e.type == pygame.MOUSEBUTTONUP:
+                print(position.current_pins)
+            elif e.type == pygame.MOUSEBUTTONUP: # Left click up
                 if promoting:
                     choice = None
                     pieces, menu_x, menu_y = draw_promotion_menu(screen, square_size, promotion_color)
@@ -132,8 +148,9 @@ def main():
                     if choice:
                         for move in promoting_moves:
                             if move.prom == {'N': 1, 'B': 2, 'R': 3, 'Q': 4}[choice]:
-                                position = position.move(move)
-                                board = bitboards_to_board(position.bitboard, position.turn)
+                                position.move(move)
+                                move_history.append(move)
+                                board = bitboards_to_board(position.bitboard)
                                 board[to_index] = promotion_color + choice
                                 break
 
@@ -144,10 +161,12 @@ def main():
                         new_pos = get_square_at_pos(mouse_pos, square_size)
                         from_index = selected_pos[0] * 8 + selected_pos[1]
                         to_index = new_pos[0] * 8 + new_pos[1]
-                        if position.get_checks()[2] == 0:
-                            valid_moves = list(generate_valid_moves(position))
+                        print('from index:', from_index)
+                        print('to index:', to_index)
+                        if not position.is_check():
+                            valid_moves = list(position.capture_moves()) + list(position.non_capture_moves())
                         else:
-                            valid_moves = list(generate_valid_moves_in_check(position))
+                            valid_moves = list(position.in_check_captures()) + list(position.in_check_moves())
                         print(valid_moves)
                         move_valid = False
                         promoting_moves = []
@@ -155,14 +174,15 @@ def main():
                         for move in valid_moves:
                             if move.i == from_index and move.j == to_index and move.prom == 0:
                                 move_valid = True
-                                position = position.move(move)
+                                position.move(move)
+                                move_history.append(move)
                                 break
                             elif move.i == from_index and move.j == to_index and move.prom != 0:
                                 promoting_moves.append(move)
 
 
                         if move_valid and promoting_moves == []:
-                            board = bitboards_to_board(position.bitboard, position.turn)
+                            board = bitboards_to_board(position.bitboard)
                             board[to_index] = selected_piece
                         
                         elif promoting_moves != []:
@@ -171,23 +191,38 @@ def main():
                             promotion_color = 'w' if position.turn else 'b'
                             draw_promotion_menu(screen, square_size, promotion_color)
                                 
-                        elif from_index == 3 and to_index == 1 and Move(0, 2, 0, -1) in valid_moves: # White kingside castling
-                            position = position.move(Move(0, 2, 0, -1))
-                            board = bitboards_to_board(position.bitboard, position.turn)
-                        elif from_index == 3 and to_index == 5 and Move(7, 5, 0, -1) in valid_moves: # White queenside castling
-                            position = position.move(Move(7, 5, 0, -1))
-                            board = bitboards_to_board(position.bitboard, position.turn)
-                        elif from_index == 59 and to_index == 57 and Move(56, 58, 0, -1) in valid_moves: # White queenside castling
-                            position = position.move(Move(56, 58, 0, -1))
-                            board = bitboards_to_board(position.bitboard, position.turn)
-                        elif from_index == 59 and to_index == 61 and Move(63, 60, 0, -1) in valid_moves: # White queenside castling
-                            position = position.move(Move(63, 60, 0, -1))
-                            board = bitboards_to_board(position.bitboard, position.turn)
+                        elif from_index == 4 and to_index == 6 and Move(7, 5, 0, -1) in valid_moves: # White kingside castling
+                            position.move(Move(7, 5, 0, -1))
+                            move_history.append(Move(7, 5, 0, -1))
+                            board = bitboards_to_board(position.bitboard)
+                        elif from_index == 4 and to_index == 2 and Move(0, 3, 0, -1) in valid_moves: # White queenside castling
+                            position.move(Move(0, 3, 0, -1))
+                            move_history.append(Move(0, 3, 0, -1))
+                            board = bitboards_to_board(position.bitboard)
+                        elif from_index == 60 and to_index == 62 and Move(63, 61, 0, -1) in valid_moves: # Black kingside castling
+                            position.move(Move(63, 61, 0, -1))
+                            move_history.append(Move(63, 61, 0, -1))
+                            board = bitboards_to_board(position.bitboard)
+                        elif from_index == 60 and to_index == 58 and Move(56, 59, 0, -1) in valid_moves: # Black queenside castling
+                            position.move(Move(56, 59, 0, -1))
+                            move_history.append(Move(56, 59, 0, -1))
+                            board = bitboards_to_board(position.bitboard)
                         else:
                             board[from_index] = selected_piece  # Revert to original position
 
                         dragged_piece = None
                         selected_piece = None
+
+            elif e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_LEFT: # Pressing left key to undo last move
+                    if move_history:  # Check if there are moves to undo
+                        last_move = move_history.pop()  # Get the last move
+                        position.unmake_move(last_move)  # Undo the last move
+                        board = bitboards_to_board(position.bitboard)  # Update board display
+
+                elif e.key == pygame.K_SPACE:  # Press SPACE to start the auto-play and undo
+                    play_and_undo_moves(position, 2, screen, square_size, pieces_images, board, promoting, promotion_color)  # Depth is set to 2 here
+
 
         draw_board(screen, board, dragged_piece, mouse_pos)
         if promoting:

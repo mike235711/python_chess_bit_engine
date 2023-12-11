@@ -1,5 +1,49 @@
 import numpy as np
+import chess
 
+def compare_dicts(dict1, dict2):
+    # Find keys that are only in dict1
+    only_in_dict1 = {k: dict1[k] for k in dict1 if k not in dict2}
+
+    # Find keys that are only in dict2
+    only_in_dict2 = {k: dict2[k] for k in dict2 if k not in dict1}
+
+    # Find keys that are in both but have different values
+    different_values = {k: (dict1[k], dict2[k]) for k in dict1 if k in dict2 and dict1[k] != dict2[k]}
+
+    return only_in_dict1, only_in_dict2, different_values
+
+def bitposition_to_chessboard(bitposition):
+    board = chess.Board(None)  # Create an empty board
+
+    piece_symbols = ['P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k']
+    
+    # Iterate through each bitboard and set pieces on the board
+    for i, bitboard in enumerate(bitposition.bitboard):
+        # For each square, check if there's a piece and place it
+        for square in range(64):
+            if bitboard & (1 << square):
+                board.set_piece_at(chess.SQUARES[square], chess.Piece.from_symbol(piece_symbols[i]))
+
+    # Set the turn
+    board.turn = chess.WHITE if bitposition.turn else chess.BLACK
+
+    # Set castling rights
+    board.castling_rights = 0
+    if bitposition.wc[0]:
+        board.castling_rights |= chess.BB_H1
+    if bitposition.wc[1]:
+        board.castling_rights |= chess.BB_A1
+    if bitposition.bc[0]:
+        board.castling_rights |= chess.BB_H8
+    if bitposition.bc[1]:
+        board.castling_rights |= chess.BB_A8
+
+    # Set en passant square
+    if bitposition.psquare != -1:
+        board.ep_square = chess.square(bitposition.psquare % 8, bitposition.psquare // 8)
+
+    return board
 def has_one_one(n):
     count = 0
     while n:
@@ -47,15 +91,18 @@ def board_to_bitboards(board):
     # Initialize bitboards
     bitboards = {piece: 0 for piece in pieces}
 
-    for i, square in enumerate(board):
+    for board_index, square in enumerate(board):
         if square in pieces:
             # Set the bit at the correct position
-            bitboards[square] |= 1 << (i)
+            #board_row = board_index // 8
+            #board_column = board_index % 8
+            #board_index = board_row * 8 + (7- board_column)
+            bitboards[square] |= 1 << board_index
 
     return list(bitboards.values())
 
 
-def bitboards_to_board(bitboards, turn):
+def bitboards_to_board(bitboards):
     """
     Convert a set of bitboards to a standard board representation.
     Returns:
@@ -63,18 +110,14 @@ def bitboards_to_board(bitboards, turn):
     """
     # Create an empty board
     pieces_1 = ['wP', 'wN', 'wB', 'wR', 'wQ', 'wK', 'bP', 'bN', 'bB', 'bR', 'bQ', 'bK']
-    pieces_2 = ['bP', 'bN', 'bB', 'bR', 'bQ', 'bK', 'wP', 'wN', 'wB', 'wR', 'wQ', 'wK']
     board = ['0'] * 64
-    if turn:
-        for piece_index, bitboard in enumerate(bitboards): # w_pawns, w_knights, w_bishops, w_rooks, w_queens, w_king, ...
-            for i in range(64):
-                if bitboard & (1 << (i)):
-                    board[i] = pieces_1[piece_index]
-    else:
-        for piece_index, bitboard in enumerate(bitboards): # b_pawns, b_knights, b_bishops, b_rooks, b_queens, b_king, ...
-            for i in range(64):
-                if bitboard & (1 << (i)):
-                    board[i] = pieces_2[piece_index]
+    for piece_index, bitboard in enumerate(bitboards): # w_pawns, w_knights, w_bishops, w_rooks, w_queens, w_king, ...
+        for i in range(64):
+            if bitboard & (1 << (i)):
+                #board_row = i // 8
+                #board_column = 7-(i % 8)
+                #board_index = board_row * 8 + board_column
+                board[i] = pieces_1[piece_index]
     return board
 
 
@@ -99,18 +142,17 @@ def generate_king_moves(square):
     return moves
 
 def generate_pawn_moves(square, color='white'): # Crawler (bitboard for all squares)
+    '''
+    Generate pawn bits without taking into account double moves
+    '''
     moves = 0
     r, c = divmod(square, 8)
     if color == 'white':
-        if r < 7:  # Pawns cannot move forward on the last rank
+        if 0< r < 7:  # Pawns cannot move forward on the last rank and are never on the first
             moves |= 1 << ((r + 1) * 8 + c)
-            if r == 1:  # Double move from starting position
-                moves |= 1 << ((r + 2) * 8 + c)
     else:  # Black pawn
-        if r > 0:  # Pawns cannot move forward on the first rank
+        if 7 > r > 0:  # Pawns cannot move forward on the first rank and are never on the first
             moves |= 1 << ((r - 1) * 8 + c)
-            if r == 6:  # Double move from starting position
-                moves |= 1 << ((r - 2) * 8 + c)
     return moves
 
 def generate_pawn_attack_moves(square, color='white'):
@@ -118,13 +160,13 @@ def generate_pawn_attack_moves(square, color='white'):
     r, c = divmod(square, 8)
 
     if color == 'white':
-        if r < 7:  # Pawns cannot attack from the last rank
+        if 0 < r < 7:  # Pawns cannot attack from the last rank and are never on the first
             if c > 0:  # Capture to the left
                 attacks |= 1 << ((r + 1) * 8 + (c - 1))
             if c < 7:  # Capture to the right
                 attacks |= 1 << ((r + 1) * 8 + (c + 1))
     elif color == 'black':  # Black pawn
-        if r > 0:  # Pawns cannot attack from the first rank
+        if 7 > r > 0:  # Pawns cannot attack from the first rank and are never on the first
             if c > 0:  # Capture to the left
                 attacks |= 1 << ((r - 1) * 8 + (c - 1))
             if c < 7:  # Capture to the right
@@ -250,7 +292,7 @@ def visualize_bitboard(bitboard):
     board_representation = ""
     for r in range(8):
         for c in range(8):
-            if bitboard & (1 << (r * 8 + c)):
+            if bitboard & (1 << ((7-r) * 8 + c)):
                 board_representation += '1 '
             else:
                 board_representation += '. '
@@ -349,6 +391,42 @@ def get_valid_piece_moves_including_captures(square, piece_type, blockers):
                 # Stop if a blocker is encountered
                 moves |= 1 << index
                 break
+            moves |= 1 << index
+            nr += dr
+            nc += dc
+        return moves
+
+    if piece_type == 'R':
+        directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]  # vertical and horizontal
+    elif piece_type == 'B':
+        directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)]  # diagonals
+    else:
+        return 'piece type should be either R or B'
+
+    possible_moves = 0
+    for direction in directions:
+        possible_moves |= ray_moves(square, direction)
+
+    return possible_moves
+
+def get_valid_piece_moves_including_captures_and_skipping_one(square, piece_type, blockers):
+    """
+    Generates possible moves for a rook or a bishop on a given square with blockers that we can go through one and the next capture.
+    """
+    def ray_moves(square, direction):
+        moves = 0
+        r, c = divmod(square, 8)
+        dr, dc = direction
+        nr, nc = r + dr, c + dc
+        count = 0
+        while 0 <= nr < 8 and 0 <= nc < 8:
+            index = nr * 8 + nc
+            if blockers & (1 << index):
+                # Stop if a blocker is encountered
+                moves |= 1 << index
+                count += 1
+                if count == 2:
+                    continue
             moves |= 1 << index
             nr += dr
             nc += dc
