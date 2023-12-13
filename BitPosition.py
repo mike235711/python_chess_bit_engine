@@ -41,9 +41,9 @@ import copy
 knight_moves = (132096, 329728, 659712, 1319424, 2638848, 5277696, 10489856, 4202496, 33816580, 84410376, 168886289, 337772578, 675545156, 1351090312, 2685403152, 1075839008, 8657044482, 21609056261, 43234889994, 86469779988, 172939559976, 345879119952, 687463207072, 275414786112, 2216203387392, 5531918402816, 11068131838464, 22136263676928, 44272527353856, 88545054707712, 175990581010432, 70506185244672, 567348067172352, 1416171111120896, 2833441750646784, 5666883501293568, 11333767002587136, 22667534005174272, 45053588738670592, 18049583422636032, 145241105196122112, 362539804446949376, 725361088165576704, 1450722176331153408, 2901444352662306816, 5802888705324613632, 11533718717099671552, 4620693356194824192, 288234782788157440, 576469569871282176, 1224997833292120064, 2449995666584240128, 4899991333168480256, 9799982666336960512, 1152939783987658752, 2305878468463689728, 1128098930098176, 2257297371824128, 4796069720358912, 9592139440717824, 19184278881435648, 38368557762871296, 4679521487814656, 9077567998918656)
 king_moves = (770, 1797, 3594, 7188, 14376, 28752, 57504, 49216, 197123, 460039, 920078, 1840156, 3680312, 7360624, 14721248, 12599488, 50463488, 117769984, 235539968, 471079936, 942159872, 1884319744, 3768639488, 3225468928, 12918652928, 30149115904, 60298231808, 120596463616, 241192927232, 482385854464, 964771708928, 825720045568, 3307175149568, 7718173671424, 15436347342848, 30872694685696, 61745389371392, 123490778742784, 246981557485568, 211384331665408, 846636838289408, 1975852459884544, 3951704919769088, 7903409839538176, 15806819679076352, 31613639358152704, 63227278716305408, 54114388906344448, 216739030602088448, 505818229730443264, 1011636459460886528, 2023272918921773056, 4046545837843546112, 8093091675687092224, 16186183351374184448, 13853283560024178688, 144959613005987840, 362258295026614272, 724516590053228544, 1449033180106457088, 2898066360212914176, 5796132720425828352, 11592265440851656704, 4665729213955833856)
 white_pawn_moves = (0, 0, 0, 0, 0, 0, 0, 0, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824, 2147483648, 4294967296, 8589934592, 17179869184, 34359738368, 68719476736, 137438953472, 274877906944, 549755813888, 1099511627776, 2199023255552, 4398046511104, 8796093022208, 17592186044416, 35184372088832, 70368744177664, 140737488355328, 281474976710656, 562949953421312, 1125899906842624, 2251799813685248, 4503599627370496, 9007199254740992, 18014398509481984, 36028797018963968, 72057594037927936, 144115188075855872, 288230376151711744, 576460752303423488, 1152921504606846976, 2305843009213693952, 4611686018427387904, 9223372036854775808, 0, 0, 0, 0, 0, 0, 0, 0)
-white_pawn_attacks = (0, 0, 0, 0, 0, 0, 0, 0, 131072, 327680, 655360, 1310720, 2621440, 5242880, 10485760, 4194304, 33554432, 83886080, 167772160, 335544320, 671088640, 1342177280, 2684354560, 1073741824, 8589934592, 21474836480, 42949672960, 85899345920, 171798691840, 343597383680, 687194767360, 274877906944, 2199023255552, 5497558138880, 10995116277760, 21990232555520, 43980465111040, 87960930222080, 175921860444160, 70368744177664, 562949953421312, 1407374883553280, 2814749767106560, 5629499534213120, 11258999068426240, 22517998136852480, 45035996273704960, 18014398509481984, 144115188075855872, 360287970189639680, 720575940379279360, 1441151880758558720, 2882303761517117440, 5764607523034234880, 11529215046068469760, 4611686018427387904, 0, 0, 0, 0, 0, 0, 0, 0)
+white_pawn_attacks = (512, 1280, 2560, 5120, 10240, 20480, 40960, 16384, 131072, 327680, 655360, 1310720, 2621440, 5242880, 10485760, 4194304, 33554432, 83886080, 167772160, 335544320, 671088640, 1342177280, 2684354560, 1073741824, 8589934592, 21474836480, 42949672960, 85899345920, 171798691840, 343597383680, 687194767360, 274877906944, 2199023255552, 5497558138880, 10995116277760, 21990232555520, 43980465111040, 87960930222080, 175921860444160, 70368744177664, 562949953421312, 1407374883553280, 2814749767106560, 5629499534213120, 11258999068426240, 22517998136852480, 45035996273704960, 18014398509481984, 144115188075855872, 360287970189639680, 720575940379279360, 1441151880758558720, 2882303761517117440, 5764607523034234880, 11529215046068469760, 4611686018427387904, 0, 0, 0, 0, 0, 0, 0, 0)
 black_pawn_moves = (0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824, 2147483648, 4294967296, 8589934592, 17179869184, 34359738368, 68719476736, 137438953472, 274877906944, 549755813888, 1099511627776, 2199023255552, 4398046511104, 8796093022208, 17592186044416, 35184372088832, 70368744177664, 140737488355328, 0, 0, 0, 0, 0, 0, 0, 0)
-black_pawn_attacks = (0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 10, 20, 40, 80, 160, 64, 512, 1280, 2560, 5120, 10240, 20480, 40960, 16384, 131072, 327680, 655360, 1310720, 2621440, 5242880, 10485760, 4194304, 33554432, 83886080, 167772160, 335544320, 671088640, 1342177280, 2684354560, 1073741824, 8589934592, 21474836480, 42949672960, 85899345920, 171798691840, 343597383680, 687194767360, 274877906944, 2199023255552, 5497558138880, 10995116277760, 21990232555520, 43980465111040, 87960930222080, 175921860444160, 70368744177664, 0, 0, 0, 0, 0, 0, 0, 0)
+black_pawn_attacks = (0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 10, 20, 40, 80, 160, 64, 512, 1280, 2560, 5120, 10240, 20480, 40960, 16384, 131072, 327680, 655360, 1310720, 2621440, 5242880, 10485760, 4194304, 33554432, 83886080, 167772160, 335544320, 671088640, 1342177280, 2684354560, 1073741824, 8589934592, 21474836480, 42949672960, 85899345920, 171798691840, 343597383680, 687194767360, 274877906944, 2199023255552, 5497558138880, 10995116277760, 21990232555520, 43980465111040, 87960930222080, 175921860444160, 70368744177664, 562949953421312, 1407374883553280, 2814749767106560, 5629499534213120, 11258999068426240, 22517998136852480, 45035996273704960, 18014398509481984)
 
 board = [ 'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R',
          'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P',
@@ -72,9 +72,12 @@ slider_unfull_rays = (bishop_unfull_rays, rook_unfull_rays, queen_unfull_rays)
 white_pawn_doubles = (0,0,0,0,0,0,0,0, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824, 2147483648, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
 black_pawn_doubles = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4294967296, 8589934592, 17179869184, 34359738368, 68719476736, 137438953472, 274877906944, 549755813888, 0,0,0,0,0,0,0,0)
 
-# Precomputed bishop and rook moves without magic numbers (they are bits corresponding to moveable and capturing squares)
-from utils import generate_bit_combinations, get_valid_piece_moves_including_captures, get_valid_piece_moves_including_captures_and_skipping_one
 
+from utils import get_set_bit_indices, find_least_significant_bit_set, has_one_one, bit_to_numpy_array
+
+# Precomputed bishop and rook moves without magic numbers (they are bits corresponding to moveable and capturing squares)
+
+from utils import generate_bit_combinations, get_valid_piece_moves_including_captures, generate_one_bit_combinations, get_valid_piece_moves
 long_precomputed_rook_table = []
 for square in range(64):
     long_precomputed_rook_table.append({})
@@ -92,23 +95,25 @@ for square in range(64):
         valid_moves_bit = get_valid_piece_moves_including_captures(square, 'B', blockers_bit)
         long_precomputed_bishop_table[square][blockers_bit] = valid_moves_bit
 
-# Precomputed bishop and rook moves without magic numbers (they are bits corresponding to moveable squares going through one piece but not two, for pins)
-long_precomputed_rook_table_skipping_one = []
+# Precomputed bishop and rook moves with only one blocker and only on the direction of blocker (for pins)
+
+long_precomputed_rook_table_one_blocker = []
 for square in range(64):
-    long_precomputed_rook_table_skipping_one.append({})
-    blockers_bits = generate_bit_combinations(square, 'R')
+    long_precomputed_rook_table_one_blocker.append({})
+    blockers_bits = generate_one_bit_combinations(rook_full_rays[square])
     for blockers_bit in blockers_bits:
-        valid_moves_bit = get_valid_piece_moves_including_captures_and_skipping_one(square, 'R', blockers_bit)
-        long_precomputed_rook_table_skipping_one[square][blockers_bit] = valid_moves_bit
+        valid_moves_bit = get_valid_piece_moves(square, 'R', blockers_bit) & get_valid_piece_moves(find_least_significant_bit_set(blockers_bit), 'R', 2**square)
+        long_precomputed_rook_table_one_blocker[square][blockers_bit] = valid_moves_bit | (2**square)
 
 
-long_precomputed_bishop_table_skipping_one = []
+long_precomputed_bishop_table_one_blocker = []
 for square in range(64):
-    long_precomputed_bishop_table_skipping_one.append({})
-    blockers_bits = generate_bit_combinations(square, 'B')
+    long_precomputed_bishop_table_one_blocker.append({})
+    blockers_bits = generate_one_bit_combinations(bishop_full_rays[square])
     for blockers_bit in blockers_bits:
-        valid_moves_bit = get_valid_piece_moves_including_captures_and_skipping_one(square, 'B', blockers_bit)
-        long_precomputed_bishop_table_skipping_one[square][blockers_bit] = valid_moves_bit
+        valid_moves_bit = get_valid_piece_moves(square, 'B', blockers_bit) & get_valid_piece_moves(find_least_significant_bit_set(blockers_bit), 'B', 2**square)
+        long_precomputed_bishop_table_one_blocker[square][blockers_bit] = valid_moves_bit | (2**square)
+
 
 passant_bitboards = {-1: 0, 
                      16 : 65536, 17 : 131072, 18 : 262144, 19 : 524288, 20 : 1048576, 21 : 2097152, 22 : 4194304, 23: 8388608, 
@@ -143,7 +148,6 @@ hmmm...
 '''
 
 from collections import namedtuple
-from utils import get_set_bit_indices, find_least_significant_bit_set, has_one_one
 Move = namedtuple("Move", "i j prom capture")  # So to define a move we must do Move(square, destination_square, promotion(maybe use array index), moving_pieces_bit)
 
 '''
@@ -171,89 +175,63 @@ class BitPosition:
         self.turn = turn  # True if white's turn, False if black
         self.position_ply_info = [] # (wc, bc, psquare, pins, checks) 
         self.move_ply_info = [] # (moving_piece, capture_index)
-        self.wc = wc
-        self.bc = bc
-        self.psquare = passant_square
+        self.wc = wc # [Boolean, Boolean] represinting white kingside/ queenside castling rights
+        self.bc = bc # [Boolean, Boolean] represinting black kingside/ queenside castling rights
+        self.psquare = passant_square # Index of the en passant square (a1 = 0, h8 = 63) if there is no en passant square then it is set to -1.
         self.current_pins = (0,0)
-        self.current_checks = 0
+        self.current_checks = 0    
 
-    def get_pins_bits(self):
+    def king_is_safe_after_passant(self, removed_square_1, removed_square_2):
         '''
-        Get a bitboard of the pinned squares, these are squares containg pinned piece and the ray. We get two bitboards, one for straight pins and one for 
-        diagonal pins. This makes generating legal moves easier, since the pinned sliders can move diagonally or straight depending if the pin is diagonal 
-        or straight.
+        See if the king is in check or not (from kings position). For when moving the king.
         '''
         bitboard = self.bitboard
-        straight_pins = 0
-        diagonal_pins = 0
-        if self.turn:
+        if self.turn: # If whites turn
             king_position = find_least_significant_bit_set(bitboard[5])
-            all_own_pieces_bit = bitboard[0] | bitboard[1] | bitboard[2] | bitboard[3] | bitboard[4] | bitboard[5]
-            all_opp_pieces_bit = bitboard[6] | bitboard[7] | bitboard[8] | bitboard[9] | bitboard[10] | bitboard[11]
-
-            # Bishop pins
+            all_own_pieces_bit_without_king = (bitboard[0] | bitboard[1] | bitboard[2] | bitboard[3] | bitboard[4] | bitboard[6] | bitboard[7] | bitboard[8] | bitboard[9] | bitboard[10] | bitboard[11]) & ~(2**removed_square_1 | 2**removed_square_2)
+            # Bishops
             if bitboard[8] != 0:
-                for square in get_set_bit_indices(bitboard[8]):
-                    if bishop_full_rays[square] & bitboard[5] != 0:
-                        bishop_ray = ((long_precomputed_bishop_table[square][all_opp_pieces_bit & bishop_unfull_rays[square]] | bitboard[8]) & long_precomputed_bishop_table[king_position][all_opp_pieces_bit & bishop_unfull_rays[king_position]])
-                        if has_one_one(bishop_ray & all_own_pieces_bit):
-                            diagonal_pins |= bishop_ray
-            
-            # Rook pins
+                moveable_squares = long_precomputed_bishop_table[king_position][bishop_unfull_rays[king_position] & (all_own_pieces_bit_without_king)]
+                if moveable_squares & bitboard[8] != 0: # If there is a bishop giving check
+                    return False
+            # Rooks
             if bitboard[9] != 0:
-                for square in get_set_bit_indices(bitboard[9]):
-                    if rook_full_rays[square] & bitboard[5] != 0:
-                        rook_ray = ((long_precomputed_rook_table[square][all_opp_pieces_bit & rook_unfull_rays[square]] | bitboard[9]) & long_precomputed_rook_table[king_position][all_opp_pieces_bit & rook_unfull_rays[king_position]]) 
-                        if has_one_one(rook_ray & all_own_pieces_bit):
-                            straight_pins |= rook_ray
-            
-            # Queen pins
+                moveable_squares = long_precomputed_rook_table[king_position][rook_unfull_rays[king_position] & (all_own_pieces_bit_without_king)]
+                if moveable_squares & bitboard[9] != 0: # If there is a rook giving check
+                    return False
+            # Queens
             if bitboard[10] != 0:
-                for square in get_set_bit_indices(bitboard[10]):
-                    if bishop_full_rays[square] & bitboard[5] != 0:
-                        bishop_ray = ((long_precomputed_bishop_table[square][all_opp_pieces_bit & bishop_unfull_rays[square]] | bitboard[10]) & long_precomputed_bishop_table[king_position][all_opp_pieces_bit & bishop_unfull_rays[king_position]]) 
-                        if has_one_one(bishop_ray & all_own_pieces_bit):
-                            diagonal_pins |= bishop_ray
-                    if rook_full_rays[square] & bitboard[5] != 0:
-                        rook_ray = ((long_precomputed_rook_table[square][all_opp_pieces_bit & rook_unfull_rays[square]] | bitboard[10]) & long_precomputed_rook_table[king_position][all_opp_pieces_bit & rook_unfull_rays[king_position]]) 
-                        if has_one_one(rook_ray & all_own_pieces_bit):
-                            straight_pins |= rook_ray
-
-        else:
+                straight_moveable_squares = long_precomputed_rook_table[king_position][rook_unfull_rays[king_position] & (all_own_pieces_bit_without_king)]
+                diag_moveable_squares = long_precomputed_bishop_table[king_position][bishop_unfull_rays[king_position] & (all_own_pieces_bit_without_king)] 
+                if straight_moveable_squares & bitboard[10] != 0: # If there is a queen giving check horizontally or vertically
+                    return False
+                if diag_moveable_squares & bitboard[10] != 0: # If there is a queen giving check diagonally
+                    return False
+            return True
+        
+        else: # If blacks turn
             king_position = find_least_significant_bit_set(bitboard[11])
-            all_opp_pieces_bit = bitboard[0] | bitboard[1] | bitboard[2] | bitboard[3] | bitboard[4] | bitboard[5]
-            all_own_pieces_bit = bitboard[6] | bitboard[7] | bitboard[8] | bitboard[9] | bitboard[10] | bitboard[11]
-
-            # Bishop pins
+            all_own_pieces_bit_without_king = (bitboard[0] | bitboard[1] | bitboard[2] | bitboard[3] | bitboard[4] | bitboard[5] | bitboard[6] | bitboard[7] | bitboard[8] | bitboard[9] | bitboard[10]) & ~(2**removed_square_1 | 2**removed_square_2)
+            # Bishops
             if bitboard[2] != 0:
-                for square in get_set_bit_indices(bitboard[2]):
-                    if bishop_full_rays[square] & bitboard[11] != 0:
-                        bishop_ray = ((long_precomputed_bishop_table[square][all_opp_pieces_bit & bishop_unfull_rays[square]] | bitboard[2]) & long_precomputed_bishop_table[king_position][all_opp_pieces_bit & bishop_unfull_rays[king_position]])
-                        if has_one_one(bishop_ray & all_own_pieces_bit):
-                            diagonal_pins |= bishop_ray
-            
-            # Rook pins
+                moveable_squares = long_precomputed_bishop_table[king_position][bishop_unfull_rays[king_position] & (all_own_pieces_bit_without_king)]
+                if moveable_squares & bitboard[2] != 0: # If there is a bishop giving check
+                    return False
+            # Rooks
             if bitboard[3] != 0:
-                for square in get_set_bit_indices(bitboard[3]):
-                    if rook_full_rays[square] & bitboard[11] != 0:
-                        rook_ray = ((long_precomputed_rook_table[square][all_opp_pieces_bit & rook_unfull_rays[square]] | bitboard[3]) & long_precomputed_rook_table[king_position][all_opp_pieces_bit & rook_unfull_rays[king_position]]) 
-                        if has_one_one(rook_ray & all_own_pieces_bit):
-                            straight_pins |= rook_ray
-            
-            # Queen pins
+                moveable_squares = long_precomputed_rook_table[king_position][rook_unfull_rays[king_position] & (all_own_pieces_bit_without_king)]
+                if moveable_squares & bitboard[3] != 0: # If there is a rook giving check
+                    return False
+            # Queens
             if bitboard[4] != 0:
-                for square in get_set_bit_indices(bitboard[4]):
-                    if bishop_full_rays[square] & bitboard[11] != 0:
-                        bishop_ray = ((long_precomputed_bishop_table[square][all_opp_pieces_bit & bishop_unfull_rays[square]] | bitboard[4]) & long_precomputed_bishop_table[king_position][all_opp_pieces_bit & bishop_unfull_rays[king_position]]) 
-                        if has_one_one(bishop_ray & all_own_pieces_bit):
-                            diagonal_pins |= bishop_ray
-                    if rook_full_rays[square] & bitboard[11] != 0:
-                        rook_ray = ((long_precomputed_rook_table[square][all_opp_pieces_bit & rook_unfull_rays[square]] | bitboard[4]) & long_precomputed_rook_table[king_position][all_opp_pieces_bit & rook_unfull_rays[king_position]]) 
-                        if has_one_one(rook_ray & all_own_pieces_bit):
-                            straight_pins |= rook_ray
+                straight_moveable_squares = long_precomputed_rook_table[king_position][rook_unfull_rays[king_position] & (all_own_pieces_bit_without_king)]
+                diag_moveable_squares = long_precomputed_bishop_table[king_position][bishop_unfull_rays[king_position] & (all_own_pieces_bit_without_king)] 
+                if straight_moveable_squares & bitboard[4] != 0: # If there is a queen giving check horizontally or vertically
+                    return False
+                if diag_moveable_squares & bitboard[4] != 0: # If there is a queen giving check diagonally
+                    return False
+            return True
 
-        return diagonal_pins, straight_pins
-    
     
     def king_is_safe(self, destination):
         '''
@@ -261,7 +239,7 @@ class BitPosition:
         '''
         bitboard = self.bitboard
         if self.turn: # If whites turn
-            all_own_pieces_bit_without_king = bitboard[0] | bitboard[1] | bitboard[2] | bitboard[3] | bitboard[4] | bitboard[6] | bitboard[7] | bitboard[8] | bitboard[9] | bitboard[10] | bitboard[11]
+            all_own_pieces_bit_without_king = bitboard[0] | bitboard[1] | bitboard[2] | bitboard[3] | bitboard[4] | bitboard[6] | bitboard[7] | bitboard[8] | bitboard[9] | bitboard[10] | bitboard[11] 
             # Pawns
             if bitboard[6] != 0: # For pawns we have to be carefull because they move upwards or downwards depending on whose turn it is
                 attacking_squares = precomputed_move_tables[6][destination]
@@ -352,7 +330,7 @@ class BitPosition:
                     return True
             # Pawns
             if bitboard[6] != 0: # For pawns we have to be carefull because they move upwards or downwards depending on whose turn it is
-                attacking_squares = precomputed_move_tables[7][king_position]
+                attacking_squares = precomputed_move_tables[6][king_position]
                 if attacking_squares & bitboard[6] != 0:
                     return True
 
@@ -387,7 +365,7 @@ class BitPosition:
 
             # Pawns 
             if bitboard[0] != 0: # For pawns we have to be carefull because they move upwards or downwards depending on whose turn it is
-                attacking_squares = precomputed_move_tables[6][king_position]
+                attacking_squares = precomputed_move_tables[7][king_position]
                 if attacking_squares & bitboard[0] != 0:
                     return True
 
@@ -398,6 +376,237 @@ class BitPosition:
                     return True
 
             return False # No checks
+        
+    def get_pins_bits(self):
+        '''
+        Get a bitboard of the pinned squares, these are squares containg pinned piece and the ray. We get two bitboards, one for straight pins and one for 
+        diagonal pins. This makes generating legal moves easier, since the pinned sliders can move diagonally or straight depending if the pin is diagonal 
+        or straight.
+        '''
+        bitboard = self.bitboard
+        
+        straight_pins = 0
+        diagonal_pins = 0
+        if self.turn:
+            king_position = find_least_significant_bit_set(bitboard[5])
+            all_own_pieces_bit = bitboard[0] | bitboard[1] | bitboard[2] | bitboard[3] | bitboard[4] | bitboard[5]
+            all_opp_pieces_bit = bitboard[6] | bitboard[7] | bitboard[8] | bitboard[9] | bitboard[10] | bitboard[11]
+
+            # Bishop pins
+            if bitboard[8] & bishop_full_rays[king_position] != 0:
+                for square in get_set_bit_indices(bitboard[8] & bishop_full_rays[king_position]):
+                    bishop_ray = long_precomputed_bishop_table_one_blocker[square][bitboard[5]]
+                    if has_one_one(bishop_ray & all_own_pieces_bit) and has_one_one(bishop_ray & all_opp_pieces_bit):
+                        diagonal_pins |= bishop_ray
+            
+            # Rook pins
+            if bitboard[9] & rook_full_rays[king_position] != 0:
+                for square in get_set_bit_indices(bitboard[9] & rook_full_rays[king_position]):
+                    rook_ray = long_precomputed_rook_table_one_blocker[square][bitboard[5]]
+                    if has_one_one(rook_ray & all_own_pieces_bit) and has_one_one(rook_ray & all_opp_pieces_bit):
+                        straight_pins |= rook_ray
+            
+            # Queen pins
+            if bitboard[10] & bishop_full_rays[king_position] != 0:
+                for square in get_set_bit_indices(bitboard[10] & bishop_full_rays[king_position]):
+                    bishop_ray = long_precomputed_bishop_table_one_blocker[square][bitboard[5]]
+                    if has_one_one(bishop_ray & all_own_pieces_bit) and has_one_one(bishop_ray & all_opp_pieces_bit):
+                        diagonal_pins |= bishop_ray
+
+            if bitboard[10] & rook_full_rays[king_position] != 0:
+                for square in get_set_bit_indices(bitboard[10] & rook_full_rays[king_position]):
+                    rook_ray = long_precomputed_rook_table_one_blocker[square][bitboard[5]]
+                    if has_one_one(rook_ray & all_own_pieces_bit) and has_one_one(rook_ray & all_opp_pieces_bit):
+                        straight_pins |= rook_ray
+
+
+        else:
+            king_position = find_least_significant_bit_set(bitboard[11])
+            all_own_pieces_bit = bitboard[6] | bitboard[7] | bitboard[8] | bitboard[9] | bitboard[10] | bitboard[11]
+            all_opp_pieces_bit = bitboard[0] | bitboard[1] | bitboard[2] | bitboard[3] | bitboard[4] | bitboard[5]
+
+            # Bishop pins
+            if bitboard[2] & bishop_full_rays[king_position] != 0:
+                for square in get_set_bit_indices(bitboard[2] & bishop_full_rays[king_position]):
+                    bishop_ray = long_precomputed_bishop_table_one_blocker[square][bitboard[11]]
+                    if has_one_one(bishop_ray & all_own_pieces_bit) and has_one_one(bishop_ray & all_opp_pieces_bit):
+                        diagonal_pins |= bishop_ray
+            
+            # Rook pins
+            if bitboard[3] & rook_full_rays[king_position] != 0:
+                for square in get_set_bit_indices(bitboard[3] & rook_full_rays[king_position]):
+                    rook_ray = long_precomputed_rook_table_one_blocker[square][bitboard[11]]
+                    if has_one_one(rook_ray & all_own_pieces_bit) and has_one_one(rook_ray & all_opp_pieces_bit):
+                        straight_pins |= rook_ray
+            
+            # Queen pins
+            if bitboard[4] & bishop_full_rays[king_position] != 0:
+                for square in get_set_bit_indices(bitboard[4] & bishop_full_rays[king_position]):
+                    bishop_ray = long_precomputed_bishop_table_one_blocker[square][bitboard[11]]
+                    if has_one_one(bishop_ray & all_own_pieces_bit) and has_one_one(bishop_ray & all_opp_pieces_bit):
+                        diagonal_pins |= bishop_ray
+
+            if bitboard[4] & rook_full_rays[king_position] != 0:
+                for square in get_set_bit_indices(bitboard[4] & rook_full_rays[king_position]):
+                    rook_ray = long_precomputed_rook_table_one_blocker[square][bitboard[11]]
+                    if has_one_one(rook_ray & all_own_pieces_bit) and has_one_one(rook_ray & all_opp_pieces_bit):
+                        straight_pins |= rook_ray
+        return diagonal_pins, straight_pins
+    
+    def new_checks_info(self):
+        '''
+        Get a bitboard of the pinned squares, these are squares containg pinned piece and the ray. We get two bitboards, one for straight pins and one for 
+        diagonal pins. This makes generating legal moves easier, since the pinned sliders can move diagonally or straight depending if the pin is diagonal 
+        or straight.
+        '''
+        bitboard = self.bitboard
+        # Positions of pieces giving checks (one bitboard for each piece type)
+        pawn_checks = 0
+        knight_checks = 0
+        bishop_checks = 0
+        rook_checks = 0
+        queen_checks = 0
+
+        rays = 0 # Rays of sliders giving checks
+        num_checks = 0 # Number of checks
+
+        # Rays in which there is a pinned piece
+        straight_pins = 0
+        diagonal_pins = 0
+
+        if self.turn:
+            king_position = find_least_significant_bit_set(bitboard[5])
+            all_own_pieces_bit = bitboard[0] | bitboard[1] | bitboard[2] | bitboard[3] | bitboard[4] | bitboard[5]
+            all_opp_pieces_bit = bitboard[6] | bitboard[7] | bitboard[8] | bitboard[9] | bitboard[10] | bitboard[11]
+            all_pieces_bit = all_own_pieces_bit | all_opp_pieces_bit
+
+            # Pawns (Note we can only give check with one pawn at a time)
+            # For pawns we have to be carefull because they move upwards or downwards depending on whose turn it is
+            attacking_squares = precomputed_move_tables[6][king_position]
+            if attacking_squares & bitboard[6] != 0:
+                pawn_checks |= attacking_squares & bitboard[6]
+                num_checks += 1
+
+            # Knights (Note we can only give check with one knight at a time)
+            moveable_squares = precomputed_move_tables[1][king_position]
+            if moveable_squares & bitboard[7] != 0: # If there is a knight giving check
+                knight_checks |= moveable_squares & bitboard[7]
+                num_checks += 1
+
+            # Bishop pins
+            if bitboard[8] & bishop_full_rays[king_position] != 0:
+                for square in get_set_bit_indices(bitboard[8] & bishop_full_rays[king_position]):
+                    bishop_ray = long_precomputed_bishop_table_one_blocker[square][bitboard[5]] # Ray from square where bishop is to king, including opponents bishop square (without taking into account blockers)
+                    if has_one_one(bishop_ray & all_pieces_bit): # Check
+                        bishop_checks |= bishop_ray & bitboard[8]
+                        rays = bishop_ray & ~bitboard[8]
+                        num_checks += 1
+                    elif has_one_one(bishop_ray & all_own_pieces_bit) and has_one_one(bishop_ray & all_opp_pieces_bit): # Pin
+                        diagonal_pins |= bishop_ray
+            
+            if num_checks == 2: # If there are two checks or more we may only move king hence other stuff like pins and rays don't need to be computed
+                return (0, 0, 0, 0, 0, 0, 2), (0, 0)
+            
+            # Rook pins
+            if bitboard[9] & rook_full_rays[king_position] != 0:
+                for square in get_set_bit_indices(bitboard[9] & rook_full_rays[king_position]):
+                    rook_ray = long_precomputed_rook_table_one_blocker[square][bitboard[5]]
+                    if has_one_one(rook_ray & all_pieces_bit): # Check
+                        rook_checks |= rook_ray & bitboard[9]
+                        rays = rook_ray & ~bitboard[9]
+                        num_checks += 1
+                    elif has_one_one(rook_ray & all_own_pieces_bit) and has_one_one(rook_ray & all_opp_pieces_bit): # Pin
+                        straight_pins |= rook_ray
+            
+
+            
+            # Queen pins
+            if bitboard[10] & bishop_full_rays[king_position] != 0:
+                for square in get_set_bit_indices(bitboard[10] & bishop_full_rays[king_position]):
+                    bishop_ray = long_precomputed_bishop_table_one_blocker[square][bitboard[5]]
+                    if has_one_one(bishop_ray & all_pieces_bit): # Check
+                        queen_checks |= bishop_ray & bitboard[10]
+                        rays = bishop_ray & ~bitboard[10]
+                        num_checks += 1
+                    elif has_one_one(bishop_ray & all_own_pieces_bit) and has_one_one(bishop_ray & all_opp_pieces_bit): # Pin
+                        diagonal_pins |= bishop_ray
+
+            if bitboard[10] & rook_full_rays[king_position] != 0:
+                for square in get_set_bit_indices(bitboard[10] & rook_full_rays[king_position]):
+                    rook_ray = long_precomputed_rook_table_one_blocker[square][bitboard[5]]
+                    if has_one_one(rook_ray & all_pieces_bit): # Check
+                        queen_checks |= rook_ray & bitboard[10]
+                        rays = rook_ray & ~bitboard[10]
+                        num_checks += 1
+                    elif has_one_one(rook_ray & all_own_pieces_bit) and has_one_one(rook_ray & all_opp_pieces_bit): # Pin
+                        straight_pins |= rook_ray
+
+
+        else:
+            king_position = find_least_significant_bit_set(bitboard[11])
+            all_own_pieces_bit = bitboard[6] | bitboard[7] | bitboard[8] | bitboard[9] | bitboard[10] | bitboard[11]
+            all_opp_pieces_bit = bitboard[0] | bitboard[1] | bitboard[2] | bitboard[3] | bitboard[4] | bitboard[5]
+            all_pieces_bit = all_own_pieces_bit | all_opp_pieces_bit
+
+            # Pawns (Note we can only give check with one pawn at a time)
+            # For pawns we have to be carefull because they move upwards or downwards depending on whose turn it is
+            attacking_squares = precomputed_move_tables[7][king_position]
+            if attacking_squares & bitboard[0] != 0:
+                pawn_checks |= attacking_squares & bitboard[0]
+                num_checks += 1
+
+            # Knights (Note we can only give check with one knight at a time)
+            moveable_squares = precomputed_move_tables[1][king_position]
+            if moveable_squares & bitboard[1] != 0: # If there is a knight giving check
+                knight_checks |= moveable_squares & bitboard[1]
+                num_checks += 1
+                
+            # Bishop pins
+            if bitboard[2] & bishop_full_rays[king_position] != 0:
+                for square in get_set_bit_indices(bitboard[2] & bishop_full_rays[king_position]):
+                    bishop_ray = long_precomputed_bishop_table_one_blocker[square][bitboard[11]]
+                    if has_one_one(bishop_ray & all_pieces_bit): # Check
+                        bishop_checks |= bishop_ray & bitboard[2]
+                        rays = bishop_ray & ~bitboard[2]
+                        num_checks += 1
+                    elif has_one_one(bishop_ray & all_own_pieces_bit) and has_one_one(bishop_ray & all_opp_pieces_bit): # Pin
+                        diagonal_pins |= bishop_ray
+            
+            if num_checks == 2: # If there are two checks or more we may only move king hence other stuff like pins and rays don't need to be computed
+                return (0, 0, 0, 0, 0, 0, 2), (0,0)
+            
+            # Rook pins
+            if bitboard[3] & rook_full_rays[king_position] != 0:
+                for square in get_set_bit_indices(bitboard[3] & rook_full_rays[king_position]):
+                    rook_ray = long_precomputed_rook_table_one_blocker[square][bitboard[11]]
+                    if has_one_one(rook_ray & all_pieces_bit): # Check
+                        rook_checks |= rook_ray & bitboard[3]
+                        rays = rook_ray & ~bitboard[3]
+                        num_checks += 1
+                    elif has_one_one(rook_ray & all_own_pieces_bit) and has_one_one(rook_ray & all_opp_pieces_bit): # Pin
+                        straight_pins |= rook_ray
+            
+            # Queen pins
+            if bitboard[4] & bishop_full_rays[king_position] != 0:
+                for square in get_set_bit_indices(bitboard[4] & bishop_full_rays[king_position]):
+                    bishop_ray = long_precomputed_bishop_table_one_blocker[square][bitboard[11]]
+                    if has_one_one(bishop_ray & all_pieces_bit): # Check
+                        queen_checks |= bishop_ray & bitboard[4]
+                        rays = bishop_ray & ~bitboard[4]
+                        num_checks += 1
+                    elif has_one_one(bishop_ray & all_own_pieces_bit) and has_one_one(bishop_ray & all_opp_pieces_bit): # Pin
+                        diagonal_pins |= bishop_ray
+
+            if bitboard[4] & rook_full_rays[king_position] != 0:
+                for square in get_set_bit_indices(bitboard[4] & rook_full_rays[king_position]):
+                    rook_ray = long_precomputed_rook_table_one_blocker[square][bitboard[11]]
+                    if has_one_one(rook_ray & all_pieces_bit): # Check
+                        queen_checks |= rook_ray & bitboard[4]
+                        rays = rook_ray & ~bitboard[4]
+                        num_checks += 1
+                    elif has_one_one(rook_ray & all_own_pieces_bit) and has_one_one(rook_ray & all_opp_pieces_bit): # Pin
+                        straight_pins |= rook_ray
+        return (pawn_checks, knight_checks, bishop_checks, rook_checks, queen_checks, rays, num_checks), (diagonal_pins, straight_pins)
     
     def get_checks_info(self):
         '''
@@ -421,7 +630,7 @@ class BitPosition:
             
             # Pawns (Note we can only give check with one pawn at a time)
             # For pawns we have to be carefull because they move upwards or downwards depending on whose turn it is
-            attacking_squares = precomputed_move_tables[7][king_position]
+            attacking_squares = precomputed_move_tables[6][king_position]
             if attacking_squares & bitboard[6] != 0:
                 pawn_checks |= attacking_squares & bitboard[6]
                 num_checks += 1
@@ -472,9 +681,9 @@ class BitPosition:
 
             # Pawns (Note we can only give check with one pawn at a time)
             # For pawns we have to be carefull because they move upwards or downwards depending on whose turn it is
-            attacking_squares = precomputed_move_tables[6][king_position]
-            if attacking_squares & bitboard[6] != 0:
-                pawn_checks |= attacking_squares & bitboard[6]
+            attacking_squares = precomputed_move_tables[7][king_position]
+            if attacking_squares & bitboard[0] != 0:
+                pawn_checks |= attacking_squares & bitboard[0]
                 num_checks += 1
 
             # Knights (Note we can only give check with one knight at a time)
@@ -524,7 +733,8 @@ class BitPosition:
         This will yield the moves to reduce computational time.
         '''
         bitboard = self.bitboard
-        self.current_checks = self.get_checks_info()
+        self.current_checks, self.current_pins = self.new_checks_info()
+        all_pins = self.current_pins[0] | self.current_pins[1]
         captures = []
         if self.turn: # If whites turn
 
@@ -535,16 +745,16 @@ class BitPosition:
             # Capturing with King
             piece_bit = bitboard[5]
             origin_square = find_least_significant_bit_set(piece_bit) # We get the indices of the squares pieces of this type are in
-            for i in range(5):
-                capture_check_squares = precomputed_move_tables[5][origin_square] & self.current_checks[i] # We get the precomputed moveable squares
+            for i in range(6,12):
+                capture_check_squares = precomputed_move_tables[5][origin_square] & bitboard[i] # We get the precomputed moveable squares
                 if capture_check_squares != 0: # If we can capture
                     for destination in get_set_bit_indices(capture_check_squares):
                         if self.king_is_safe(destination):
-                            captures.append(Move(origin_square, destination, 0, i + 6))
+                            captures.append(Move(origin_square, destination, 0, i))
 
             if self.current_checks[-1] == 1: # We can only capture (with a piece that is not the king) or block if there is only one check
                 # Capturing with Pawns
-                piece_bit = bitboard[0]
+                piece_bit = bitboard[0] & ~all_pins
                 if piece_bit != 0: # If we can't move pawns
                     for origin_square in get_set_bit_indices(piece_bit): # For position of piece of this type
                         for i in range(5):
@@ -558,9 +768,11 @@ class BitPosition:
                                     captures.append(Move(origin_square, destination, 1, i + 6))
                                 else:
                                     captures.append(Move(origin_square, destination, 0, i + 6))
+                        if precomputed_move_tables[6][origin_square] & passant_bitboards[self.psquare] != 0 and self.king_is_safe_after_passant(origin_square, self.psquare-8): # En passant capture
+                            captures.append(Move(origin_square, self.psquare, 0, 6))
 
                 # Capturing with knights
-                piece_bit = bitboard[1]
+                piece_bit = bitboard[1] & ~all_pins
                 if piece_bit != 0: # If we have no pieces of the current type
                     for origin_square in get_set_bit_indices(piece_bit): # For position of piece of this type
                         for i in range(5):
@@ -570,7 +782,7 @@ class BitPosition:
                 
 
                 # Capturing with Rooks
-                piece_bit = bitboard[3]
+                piece_bit = bitboard[3] & ~all_pins
                 if piece_bit != 0:
                     for origin_square in get_set_bit_indices(piece_bit):
                         for i in range(5):
@@ -579,7 +791,7 @@ class BitPosition:
                                 captures.append(Move(origin_square, find_least_significant_bit_set(capture_check_squares), 0, i + 6))
 
                 # Capturing with Bishops
-                piece_bit = bitboard[2]
+                piece_bit = bitboard[2] & ~all_pins
                 if piece_bit != 0:
                     for origin_square in get_set_bit_indices(piece_bit):
                         for i in range(5):
@@ -588,7 +800,7 @@ class BitPosition:
                                 captures.append(Move(origin_square, find_least_significant_bit_set(capture_check_squares), 0, i + 6))
                 
                 # Capturing with Queens
-                piece_bit = bitboard[4]
+                piece_bit = bitboard[4] & ~all_pins
                 if piece_bit != 0:
                     for origin_square in get_set_bit_indices(piece_bit):
                         for i in range(5):
@@ -605,15 +817,15 @@ class BitPosition:
             piece_bit = bitboard[11]
             origin_square = find_least_significant_bit_set(piece_bit) # We get the indices of the squares pieces of this type are in
             for i in range(5):
-                capture_check_squares = precomputed_move_tables[5][origin_square] & self.current_checks[i] # We get the precomputed moveable squares
+                capture_check_squares = precomputed_move_tables[5][origin_square] & bitboard[i] # We get the precomputed moveable squares
                 if capture_check_squares != 0: # If we can capture
                     for destination in get_set_bit_indices(capture_check_squares):
                         if self.king_is_safe(destination):
-                            captures.append(Move(origin_square, destination, 0, i + 6))
+                            captures.append(Move(origin_square, destination, 0, i+6))
 
             if self.current_checks[-1] == 1: # We can only capture (with a piece that is not the king) or block if there is only one check
                 # Capturing with Pawns
-                piece_bit = bitboard[6]
+                piece_bit = bitboard[6] & ~all_pins
                 if piece_bit != 0: # If we can't move pawns
                     for origin_square in get_set_bit_indices(piece_bit): # For position of piece of this type
                         for i in range(5):
@@ -627,9 +839,11 @@ class BitPosition:
                                     captures.append(Move(origin_square, destination, 1, i + 6))
                                 else:
                                     captures.append(Move(origin_square, destination, 0, i + 6))
+                        if precomputed_move_tables[7][origin_square] & passant_bitboards[self.psquare] != 0 and self.king_is_safe_after_passant(origin_square, self.psquare+8): # En passant capture (ply_info[-1][2] = psquare)
+                            captures.append(Move(origin_square, self.psquare, 0, 6))
 
                 # Capturing with knights
-                piece_bit = bitboard[7]
+                piece_bit = bitboard[7] & ~all_pins
                 if piece_bit != 0: # If we have no pieces of the current type
                     for origin_square in get_set_bit_indices(piece_bit): # For position of piece of this type
                         for i in range(5):
@@ -639,7 +853,7 @@ class BitPosition:
                 
 
                 # Capturing with Rooks
-                piece_bit = bitboard[9]
+                piece_bit = bitboard[9] & ~all_pins
                 if piece_bit != 0:
                     for origin_square in get_set_bit_indices(piece_bit):
                         for i in range(5):
@@ -648,7 +862,7 @@ class BitPosition:
                                 captures.append(Move(origin_square, find_least_significant_bit_set(capture_check_squares), 0, i + 6))
 
                 # Capturing with Bishops
-                piece_bit = bitboard[8]
+                piece_bit = bitboard[8] & ~all_pins
                 if piece_bit != 0:
                     for origin_square in get_set_bit_indices(piece_bit):
                         for i in range(5):
@@ -657,7 +871,7 @@ class BitPosition:
                                 captures.append(Move(origin_square, find_least_significant_bit_set(capture_check_squares), 0, i + 6))
                 
                 # Capturing with Queens
-                piece_bit = bitboard[10]
+                piece_bit = bitboard[10] & ~all_pins
                 if piece_bit != 0:
                     for origin_square in get_set_bit_indices(piece_bit):
                         for i in range(5):
@@ -675,6 +889,7 @@ class BitPosition:
         '''
         bitboard = self.bitboard
         _, _, _, _, _, rays, num_checks = self.current_checks
+        all_pins = self.current_pins[0] | self.current_pins[1]
         all_pieces_bit = bitboard[0] | bitboard[1] | bitboard[2] | bitboard[3] | bitboard[4] | bitboard[5] | bitboard[6] | bitboard[7] | bitboard[8] | bitboard[9] | bitboard[10] | bitboard[11]
         
         if self.turn: # If whites turn
@@ -683,7 +898,7 @@ class BitPosition:
 
             if num_checks == 1: # We can only capture (with a piece that is not the king) or block if there is only one check
                 # Blocking with Pawns
-                piece_bit = bitboard[0]
+                piece_bit = bitboard[0] & ~all_pins
                 if piece_bit != 0: # If we can't move pawns
                     pawn_indices = get_set_bit_indices(piece_bit) # The indices of the squares the pawns are in
                     for origin_square in pawn_indices: # For position of piece of this type
@@ -702,7 +917,7 @@ class BitPosition:
                             yield Move(origin_square, origin_square + 16, 0, 0)
 
                 # Blocking with knights
-                piece_bit = bitboard[1]
+                piece_bit = bitboard[1] & ~all_pins
                 if piece_bit != 0: # If we have no pieces of the current type
                     bit_indices = get_set_bit_indices(piece_bit) # We get the indices of the squares pieces of this type are in
                     for origin_square in bit_indices: # For position of piece of this type
@@ -712,7 +927,7 @@ class BitPosition:
                                 yield Move(origin_square, destination, 0, 0) 
 
                 # Blocking with Rooks
-                piece_bit = bitboard[3]
+                piece_bit = bitboard[3] & ~all_pins
                 if piece_bit != 0:
                     bit_indices = get_set_bit_indices(piece_bit)
                     for origin_square in bit_indices:
@@ -722,7 +937,7 @@ class BitPosition:
                                 yield Move(origin_square, destination, 0, 0)
 
                 # Blocking with Bishops
-                piece_bit = bitboard[2]
+                piece_bit = bitboard[2] & ~all_pins
                 if piece_bit != 0:
                     bit_indices = get_set_bit_indices(piece_bit)
                     for origin_square in bit_indices:
@@ -732,7 +947,7 @@ class BitPosition:
                                 yield Move(origin_square, destination, 0, 0) 
                 
                 # Blocking with Queens
-                piece_bit = bitboard[4]
+                piece_bit = bitboard[4] & ~all_pins
                 if piece_bit != 0:
                     bit_indices = get_set_bit_indices(piece_bit)
                     for origin_square in bit_indices:
@@ -758,7 +973,7 @@ class BitPosition:
 
             if num_checks == 1: # We can only capture (with a piece that is not the king) or block if there is only one check
                 # Blocking with Pawns
-                piece_bit = bitboard[6]
+                piece_bit = bitboard[6] & ~all_pins
                 if piece_bit != 0: # If we can't move pawns
                     pawn_indices = get_set_bit_indices(piece_bit) # The indices of the squares the pawns are in
                     for origin_square in pawn_indices: # For position of piece of this type
@@ -777,7 +992,7 @@ class BitPosition:
                             yield Move(origin_square, origin_square - 16, 0, 0)
 
                 # Blocking with knights
-                piece_bit = bitboard[7]
+                piece_bit = bitboard[7] & ~all_pins
                 if piece_bit != 0: # If we have no pieces of the current type
                     bit_indices = get_set_bit_indices(piece_bit) # We get the indices of the squares pieces of this type are in
                     for origin_square in bit_indices: # For position of piece of this type
@@ -787,7 +1002,7 @@ class BitPosition:
                                 yield Move(origin_square, destination, 0, 0) 
 
                 # Blocking with Rooks
-                piece_bit = bitboard[9]
+                piece_bit = bitboard[9] & ~all_pins
                 if piece_bit != 0:
                     bit_indices = get_set_bit_indices(piece_bit)
                     for origin_square in bit_indices:
@@ -797,7 +1012,7 @@ class BitPosition:
                                 yield Move(origin_square, destination, 0, 0)
 
                 # Blocking with Bishops
-                piece_bit = bitboard[8]
+                piece_bit = bitboard[8] & ~all_pins
                 if piece_bit != 0:
                     bit_indices = get_set_bit_indices(piece_bit)
                     for origin_square in bit_indices:
@@ -807,7 +1022,7 @@ class BitPosition:
                                 yield Move(origin_square, destination, 0, 0) 
                 
                 # Blocking with Queens
-                piece_bit = bitboard[10]
+                piece_bit = bitboard[10] & ~all_pins
                 if piece_bit != 0:
                     bit_indices = get_set_bit_indices(piece_bit)
                     for origin_square in bit_indices:
@@ -838,8 +1053,6 @@ class BitPosition:
         bitboard = self.bitboard
         self.current_pins = self.get_pins_bits() # Computes the pins and stores the in self.pins and self.fake_pins (so that in non capture moves it is not necessary to compute)
         diagonal_pins, straight_pins = self.current_pins # Add pins to pins_ply so that we don't have to store them inside bitposition
-        print('straight pins', straight_pins)
-        print('diagonal pins', diagonal_pins)
         full_pins = diagonal_pins | straight_pins
         captures = []
 
@@ -929,7 +1142,7 @@ class BitPosition:
                                                         Move(origin_square, destination, 2, index), Move(origin_square, destination, 1, index)])
                                     else:
                                         captures.append(Move(origin_square, destination, 0, index)) # checks will have odd is_check attribute
-                    if attacking_squares & passant_bitboards[self.psquare] != 0: # En passant capture (ply_info[-1][2] = psquare)
+                    if attacking_squares & passant_bitboards[self.psquare] != 0 and self.king_is_safe_after_passant(origin_square, self.psquare-8): # En passant capture (ply_info[-1][2] = psquare)
                         captures.append(Move(origin_square, self.psquare, 0, 6))
 
 
@@ -1085,7 +1298,7 @@ class BitPosition:
                                     else:
                                         captures.append(Move(origin_square, destination, 0, index+6)) # checks will have odd is_check attribute
 
-                    if attacking_squares & passant_bitboards[self.psquare] != 0: # En passant capture (ply_info[-1][2] = psquare)
+                    if attacking_squares & passant_bitboards[self.psquare] != 0 and self.king_is_safe_after_passant(origin_square, self.psquare+8): # En passant capture (ply_info[-1][2] = psquare)
                         captures.append(Move(origin_square, self.psquare, 0, 6))
 
 
@@ -1191,7 +1404,7 @@ class BitPosition:
                             yield Move(7, 5, 0, -1) # Make the move as if rook moved (better for move method)
 
                 if self.wc[1]: # If its whites turn with queenside castling rights (ply_info[-1][0] = wc)
-                    if all_pieces_bit & 12 == 0: # If pieces are not blocking
+                    if all_pieces_bit & 14 == 0: # If pieces are not blocking
                         if self.king_is_safe(2) and self.king_is_safe(3):
                             yield Move(0, 3, 0, -1)
                     
@@ -1331,7 +1544,7 @@ class BitPosition:
                             yield Move(63, 61, 0, -1)
                 
                 if self.bc[1]: # If its black turn with queenside castling rights (ply_info[-1][1] = bc)
-                    if all_pieces_bit & 864691128455135232 == 0:
+                    if all_pieces_bit & 1008806316530991104 == 0:
                         if self.king_is_safe(59) and self.king_is_safe(58):
                             yield Move(56, 59, 0, -1)
                     
@@ -1547,7 +1760,7 @@ class BitPosition:
                 self.psquare = move.j + 8 # We store the row +8 to reduce the size
         
         # Add move ply info
-        self.move_ply_info.append((moving_piece, move.capture))
+        self.move_ply_info.append((moving_piece, move.capture, move.prom))
 
         # Update info
         self.current_checks = 0
@@ -1561,7 +1774,7 @@ class BitPosition:
         track of some irreversible aspects of the game at each ply. These are (white castling rights, black castling rights, passant square, 
         moving piece, capture index, pins, checks).
         '''
-        moving_indx, capture_indx = self.move_ply_info.pop()
+        moving_indx, capture_indx, move_promotion = self.move_ply_info.pop()
         self.wc, self.bc, self.psquare, self.current_pins, self.current_checks = self.position_ply_info.pop() # Update irreversible info
 
         if self.turn: # Whites turn (Last move was black's)
@@ -1573,7 +1786,10 @@ class BitPosition:
                 self.bitboard[capture_indx-6] |= 1 << move.j
 
             # Unmove the black moving piece
-            self.bitboard[moving_indx] &= ~(1 << move.j)
+            if move_promotion == 0:
+                self.bitboard[moving_indx] &= ~(1 << move.j)
+            else:
+                self.bitboard[move_promotion+6] &= ~(1 << move.j)
             self.bitboard[moving_indx] |= 1 << move.i
 
             # Undoing castling, we must also move the king (the part above takes care of the rook)
@@ -1589,7 +1805,11 @@ class BitPosition:
                 self.bitboard[capture_indx] |= 1 << move.j
 
             # Unmove the white moving piece
-            self.bitboard[moving_indx] &= ~(1 << move.j)
+            if move_promotion == 0:
+                self.bitboard[moving_indx] &= ~(1 << move.j)
+            else:
+                self.bitboard[move_promotion] &= ~(1 << move.j)
+
             self.bitboard[moving_indx] |= 1 << move.i
 
             # Undoing castling, we must also move the king (the part above takes care of the rook)
@@ -1597,3 +1817,360 @@ class BitPosition:
                 self.bitboard[5] = 16
         
         self.turn = not self.turn
+
+
+######################################################
+# Simple evaluation function (CHECK THE POINTS PER SQUARE ARE RELIABLE)
+#####################################################3
+# First elements correspond to h8 and last to a1
+# White Pawns (Encouraging center control and advancement)
+white_pawns = np.array([
+    0, 0, 0, 0, 0, 0, 0, 0,
+    5, 5, 5, 5, 5, 5, 5, 5,
+    1, 1, 2, 4, 4, 2, 1, 1,
+    1, 1, 1, 3, 3, 1, 1, 1,
+    1, 1, 1, 3, 3, 1, 1, 1,
+    1, 1, 1, 2, 2, 1, 1, 1,
+    5, 5, 1, 1, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 0, 0, 0
+])
+
+# White Knights (Prioritizing central and advanced positions)
+white_knights = np.array([
+    1, 2, 3, 3, 3, 3, 2, 1,
+    2, 3, 4, 4, 4, 4, 3, 2,
+    3, 4, 5, 5, 5, 5, 4, 3,
+    3, 4, 5, 6, 6, 5, 4, 3,
+    3, 4, 5, 6, 6, 5, 4, 3,
+    3, 4, 5, 5, 5, 5, 4, 3,
+    2, 3, 4, 4, 4, 4, 3, 2,
+    1, 2, 3, 3, 3, 3, 2, 1
+])
+
+# White Bishops (Valuing central and diagonal control)
+white_bishops = np.array([
+    2, 3, 3, 3, 3, 3, 3, 2,
+    3, 4, 4, 4, 4, 4, 4, 3,
+    3, 4, 5, 5, 5, 5, 4, 3,
+    3, 4, 5, 5, 5, 5, 4, 3,
+    3, 4, 5, 5, 5, 5, 4, 3,
+    3, 4, 5, 5, 5, 5, 4, 3,
+    3, 4, 4, 4, 4, 4, 4, 3,
+    2, 3, 3, 3, 3, 3, 3, 2
+])
+
+# White Rooks (Valuing open files and back rank protection)
+white_rooks = np.array([
+    1, 1, 1, 2, 2, 1, 1, 1,
+    2, 3, 3, 3, 3, 3, 3, 2,
+    1, 2, 2, 2, 2, 2, 2, 1,
+    1, 2, 2, 2, 2, 2, 2, 1,
+    1, 2, 2, 2, 2, 2, 2, 1,
+    1, 2, 2, 2, 2, 2, 2, 1,
+    1, 2, 2, 2, 2, 2, 2, 1, 
+    1, 1, 1, 2, 2, 1, 1, 1
+    ])
+
+# White Queen (General value across the board with slight central preference)
+white_queen = np.array([
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1
+])
+
+# White King (Early game positioning, safer in the corners/castled)
+white_king = np.array([
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    4, 5, 5, 3, 3, 5, 5, 4
+])
+
+# These tables can be mirrored for black pieces by reversing the rows
+black_pawns = np.flipud(white_pawns)
+black_knights = np.flipud(white_knights)
+black_bishops = np.flipud(white_bishops)
+black_rooks = np.flipud(white_rooks)
+black_queen = np.flipud(white_queen)
+black_king = np.flipud(white_king)
+
+points = (white_pawns, white_knights, white_bishops, white_rooks, white_queen, white_king, black_pawns, black_knights, black_bishops, black_rooks, black_queen, black_king)
+
+def evaluation_function(bitposition):
+    material_value = (200, 400, 400, 500, 900, 1000
+                      -200, -400, -400, -500, -900, 1000)
+    total_eval = 0
+    for i, bit in enumerate(bitposition.bitboard):
+        total_eval += points[i][bit_to_numpy_array(bit)] * material_value[i]
+    return total_eval
+
+
+#######################################################
+# Search
+#######################################################
+
+Squares_Dict = ['a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1',
+                'a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2',
+                'a3', 'b3', 'c3', 'd3', 'e3', 'f3', 'g3', 'h3',
+                'a4', 'b4', 'c4', 'd4', 'e4', 'f4', 'g4', 'h4',
+                'a5', 'b5', 'c5', 'd5', 'e5', 'f5', 'g5', 'h5',
+                'a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6',
+                'a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7',
+                'a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8']
+
+import time
+
+class HashIterativeEngine:
+    '''
+    In this engine a good evaluation for us will be positive and a good evaluation for opponent will be negative.
+    '''
+    def __init__(self, evaluation_func):
+        self.evaluation_func = evaluation_func
+
+
+    def alpha_beta(self, position, depth, alpha, beta, our_turn, hash_table, killer1, killer2, killer1_count, killer2_count, iterative_moves, count):
+        count += 1
+
+        # Building hash_table in order to have evaluations of previously computed positions
+        # The hash_keys are strings containing: board, passant_square, player_turn 
+
+        if position.turn == True: # Whose turn it is will be part of the hash keys (True if white's turn)
+            turn = '1'
+        else:
+            turn = '0'
+        hash_key = ''.join([''.join(position.board), str(position.psquare), turn])
+        
+        if hash_key in hash_table.keys():
+            # I think killer counts both equal 0 if this is the first set of moves being calculated.
+            return hash_table[hash_key], 0
+
+        if len(hash_table) == 100:
+            del hash_table[(next(iter(hash_table)))]  # Delete oldest hash_key
+
+        ordered_moves = position.ordered_moves()
+
+        # If we reach a position where game has ended
+            
+        if position.three_fold():  # Repetitions
+            return 0, 0
+
+        if len(ordered_moves) == 0 and position.checks_pins()[0][0] == 0:  # Stalemate
+            return 0, 0
+
+        if len(ordered_moves) == 0 and our_turn:  # Checkmate against us
+            return -10003, 0
+
+        if len(ordered_moves) == 0 and not our_turn:  # Checkmate against opponent
+            return 10003, 0
+        
+
+        # If we reach a quiet position after reaching the max depth, we return the evaluation
+
+        if depth <= 0 and position.quiet() and our_turn:
+            x = self.evaluation_func(position.board)
+            hash_table[hash_key] = x
+            return x, 0
+
+        if depth <= 0 and position.quiet() and not our_turn:
+            # The evaluation function will give the evaluation from the board and the board shows
+            # black as white (since it is black's turn) therefore the evaluation must be the negative
+            # of what is given by the evaluation function.
+            x = -self.evaluation_func(position.board)
+            hash_table[hash_key] = x
+            return x, 0
+        
+        # If depth is reached we continue with captures (not pawns), checks and out of attack moves until 
+        # quiet position. Otherwise, we return the evaluation
+
+        if depth <= 0 and not position.quiet():  
+            # Quiescence moves
+            original_moves = copy.copy(ordered_moves) # Used for out_of_attack_moves
+            ordered_moves = [move for move in ordered_moves if move.score > 2]
+            # Bad captures have odd scores, the rest of scored moves have even scores, so if all the moves 
+            # in ordered_moves are bad captures, we add a random move. Otherwise forcing these moves may
+            # lead to biased evaluation.
+
+            if depth <= -4:
+                # If depth is <-4 we only consider captures, to ensure we dont end in a infinite loop of checks
+                ordered_moves = [move for move in ordered_moves if move.score != 6]
+
+            contains_not_bad_move = False
+            for move in ordered_moves:
+                if move.score % 2 == 0 and move.score != 8:
+                    # If move has a score of 8 it means it is a pawn capture with check, which isn't
+                    # necessarily a good move
+                    contains_not_bad_move = True
+                    break
+            if not contains_not_bad_move:
+                attacked_squares = position.own_attacked_squares()
+                out_of_attack_movess = out_of_attack_moves(position.board, original_moves, ordered_moves, attacked_squares)
+                if depth > -4:
+                    ordered_moves = ordered_moves + out_of_attack_movess
+                if depth > -2:
+                    # sometimes the position isn't quiet but we can't make a capture or check (the opponent can)
+                    # so we perform only some random moves. This is because we may inevitably in the next move lose
+                    # a piece.
+                    # ordered_moves = ordered_moves + random_moves
+                    save_movess = safe_moves(original_moves, attacked_squares, ordered_moves)
+                    ordered_moves = ordered_moves + save_movess
+                else:
+                    save_movess = safe_moves(original_moves, attacked_squares, ordered_moves)
+                    if save_movess != []:
+                        ordered_moves = ordered_moves + random.sample(save_movess,1)
+            
+
+        if len(ordered_moves) == 0:
+            save_movess = safe_moves(original_moves, attacked_squares, ordered_moves)
+            if save_movess != []:
+                ordered_moves = save_movess
+            else:
+                ordered_moves = original_moves
+
+        if depth <= -6 and our_turn:
+            x = self.evaluation_func(position.board)
+            return x, 0
+
+        if depth <= -6 and not our_turn:
+            # The evaluation function will give the evaluation from the board and the board shows
+            # black as white (since it is black's turn) therefore the evaluation must be the negative
+            # of what is given by the evaluation function.
+            x = -self.evaluation_func(position.board)
+            return x, 0
+        
+        # We set the killer moves if they haven't been set, these are the best moves in the sibling branch
+        
+        if killer1 == None and our_turn: # At the start killer is set to None, so we start with the first move
+            killer1 = ordered_moves[0]
+        
+        elif killer2 == None and not our_turn:
+            killer2 = ordered_moves[0]
+        
+        # Killer_count prevents killer moves from going to different depths
+
+        if our_turn:
+            killer1_count += 1
+        else: 
+            killer2_count += 1
+        
+        if killer1_count == 2:
+            killer1 = ordered_moves[0]
+        
+        if killer2_count == 2:
+            killer2 = ordered_moves[0]
+            
+        # Move killer to first position
+
+        if our_turn and killer1 in ordered_moves:
+            ordered_moves.insert(0, ordered_moves.pop(ordered_moves.index(killer1)))
+
+        elif not our_turn and killer2 in ordered_moves:
+            ordered_moves.insert(0, ordered_moves.pop(ordered_moves.index(killer2)))
+        
+        if count == 1 and len(iterative_moves) != 0:
+            ordered_moves.insert(0, ordered_moves.pop(ordered_moves.index(iterative_moves[0])))
+
+        best_move = ordered_moves[0]
+
+        if our_turn:  
+            # If we have to move, we want to maximize. This is ensured because board is always from player to move 
+            # perspective as white and when we evaluate a position, depending of the turn we give + or - the evaluation.
+
+            value1 = -10000  # This is the best evaluation for us in the child_values (we start at the worst possible evaluation)
+            for move in ordered_moves:
+                if move == Move(11, 29, '', 0) and depth == 1:
+                    print('yey')
+                if move == Move(29, 43, '', 0) and depth == -1:
+                    print('yey')
+                if move == Move(14, 22, '', 0) and depth == -3:
+                    print('yey')
+                position.move(move)
+                child_value = self.alpha_beta(position, depth - 1, alpha, beta, False, hash_table, killer1, killer2, killer1_count, killer2_count, iterative_moves, count)[0]
+                killer1_count = 0
+                if child_value > value1:
+                    # If we can improve the best value, then we have found a better move in the child values
+                    value1 = child_value
+                    best_move = move
+                    killer1 = best_move
+                position.pop()
+                if value1 >= beta:
+                    # If our best move is better than the best in another set of moves that lead from a different 
+                    # move from opponent, then opponent will choose the other move. So theres no need to calculate in this set
+                    # of child values anymore.
+                    break 
+                alpha = max(alpha, value1) 
+
+        else:  # If opponent has to move
+            value2 = 10000 # This is the best evaluation for opponent in the child_values (we start at the worst possible evaluation)
+            for move in ordered_moves:
+                position.move(move)
+                if move == Move(13,20, '', 4) and depth == -2:
+                    print('yay')
+                child_value = self.alpha_beta(position, depth - 1, alpha, beta, True, hash_table, killer1, killer2, killer1_count, killer2_count, iterative_moves, count)[0]
+                killer2_count = 0
+                if child_value < value2:
+                    value2 = child_value
+                    best_move = move
+                    killer2 = best_move
+                position.pop() 
+                if alpha >= value2:
+                    # If opponent's best move is better than the best in another set of moves that lead from a different 
+                    # move (parent2) from us, then we will choose the other move (parent2). So there's no need to calculate in
+                    # this set of child moves any more.
+                    break             
+                beta = min(beta, value2)
+
+        # If there has been an alpha/beta break, then value1 and value2 are going to be telling the player that moved before,
+        # that the move was worse than a previously calculated one (in the same depth).
+        
+        if our_turn:
+            x = value1
+        else:
+            x = value2
+        hash_table[hash_key] = x
+
+        return (x, best_move)
+
+    def Search(self, position, max_time): # max time we want to consume in seconds
+        # alpha is the current best evaluation for white, it will start at -1000
+        # beta is the current best evaluation for black, it will start at +1000
+        start_time = time.time()
+        best_move = None
+        killer1 = None
+        killer2 = None
+        alpha = -10005
+        beta = 10005
+        iterative_moves = []
+        last_depth = 0
+        for depth in range(100):
+            best_value, best_move = self.alpha_beta(position, depth+1, alpha, beta, our_turn = True, hash_table={}, killer1=killer1, killer2=killer2, killer1_count=0, killer2_count=0, iterative_moves=iterative_moves, count = 0)
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            iterative_moves = [best_move] # ¡¡¡NO METER SOLO EL PRIMER MOVIMIENTO!!!
+            if elapsed_time >= max_time:
+                last_depth = depth + 1
+                break
+        return ["Time taken:", elapsed_time, "seconds", "Best move: ", best_move, "Evaluation: ", best_value, 'Depth:', last_depth]
+
+    def Tell_Move(move):  # Spit move to UCI
+        square = Squares_Dict[move.i]
+        destination = Squares_Dict[move.j]
+        return 'bestmove '+''.join([square, destination, move.prom])
+    
+
+def tell_move(move):  # Spit move to UCI
+    square = Squares_Dict[move.i]
+    destination = Squares_Dict[move.j]
+    return 'bestmove ' + ''.join([square, destination, move.prom])
+
+def time_management(our_time, increment):
+    time_for_move = our_time/2 + increment
+    return time_for_move

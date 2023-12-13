@@ -1,5 +1,12 @@
 import numpy as np
 import chess
+import numpy as np
+
+def bit_to_numpy_array(bit):
+    array = np.zeros(64, dtype=int)
+    for i in range(64):
+        array[i] = (bit >> i) & 1
+    return array[::-1]
 
 def compare_dicts(dict1, dict2):
     # Find keys that are only in dict1
@@ -44,6 +51,55 @@ def bitposition_to_chessboard(bitposition):
         board.ep_square = chess.square(bitposition.psquare % 8, bitposition.psquare // 8)
 
     return board
+
+def bitposition_to_fen(bitposition):
+    # Mapping of piece types to their representations
+    pieces = ['P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k']
+
+    # Generate the 8x8 board representation
+    board = [''] * 64
+    for i, bitboard in enumerate(bitposition.bitboard):
+        for j in range(64):
+            if bitboard & (1 << j):
+                board[j] = pieces[i]
+
+    # Convert board to FEN string
+    fen_rows = []
+    for row in range(8):
+        empty_count = 0
+        fen_row = ''
+        for col in range(8):
+            piece = board[(7-row) * 8 + col]
+            if piece:
+                if empty_count:
+                    fen_row += str(empty_count)
+                    empty_count = 0
+                fen_row += piece
+            else:
+                empty_count += 1
+        if empty_count:
+            fen_row += str(empty_count)
+        fen_rows.append(fen_row)
+    fen_board = '/'.join(fen_rows)
+
+    # Turn
+    turn = 'w' if bitposition.turn else 'b'
+
+    # Castling rights
+    wc = ''.join(['K' if bitposition.wc[0] else '', 'Q' if bitposition.wc[1] else ''])
+    bc = ''.join(['k' if bitposition.bc[0] else '', 'q' if bitposition.bc[1] else ''])
+    castling_rights = wc + bc or '-'
+
+    # En passant target square
+    if bitposition.psquare != -1:
+        file = chr((bitposition.psquare % 8) + ord('a'))
+        rank = str(8 - (bitposition.psquare // 8))
+        ep_square = file + rank
+    else:
+        ep_square = '-'
+
+    return f'{fen_board} {turn} {castling_rights} {ep_square} 0 1'  # Assuming halfmove and fullmove are set to default values
+
 def has_one_one(n):
     count = 0
     while n:
@@ -148,7 +204,7 @@ def generate_pawn_moves(square, color='white'): # Crawler (bitboard for all squa
     moves = 0
     r, c = divmod(square, 8)
     if color == 'white':
-        if 0< r < 7:  # Pawns cannot move forward on the last rank and are never on the first
+        if 0 < r < 7:  # Pawns cannot move forward on the last rank and are never on the first
             moves |= 1 << ((r + 1) * 8 + c)
     else:  # Black pawn
         if 7 > r > 0:  # Pawns cannot move forward on the first rank and are never on the first
@@ -160,13 +216,13 @@ def generate_pawn_attack_moves(square, color='white'):
     r, c = divmod(square, 8)
 
     if color == 'white':
-        if 0 < r < 7:  # Pawns cannot attack from the last rank and are never on the first
+        if 0 <= r < 7:  # Pawns cannot attack from the last rank and are never on the first
             if c > 0:  # Capture to the left
                 attacks |= 1 << ((r + 1) * 8 + (c - 1))
             if c < 7:  # Capture to the right
                 attacks |= 1 << ((r + 1) * 8 + (c + 1))
     elif color == 'black':  # Black pawn
-        if 7 > r > 0:  # Pawns cannot attack from the first rank and are never on the first
+        if 7 >= r > 0:  # Pawns cannot attack from the first rank and are never on the last
             if c > 0:  # Capture to the left
                 attacks |= 1 << ((r - 1) * 8 + (c - 1))
             if c < 7:  # Capture to the right
@@ -342,6 +398,24 @@ def generate_two_bit_combinations(bit):
 
     yield from generate_combinations(bit)
 
+def generate_one_bit_combinations(bit):
+    '''
+    Generate all combinations of the given bit with exactly one '1's.
+    '''
+
+    def generate_combinations(n, current=0, pos=0, count=0):
+        if pos < 64:
+            # Recurse without changing the current bit
+            yield from generate_combinations(n, current, pos + 1, count)
+            # Recurse with the current bit toggled if it is set in n
+            if n & (1 << pos):
+                yield from generate_combinations(n, current | (1 << pos), pos + 1, count + 1)
+        elif count == 1:
+            # Yield the combination only if it has exactly two '1's
+            yield current
+
+    yield from generate_combinations(bit)
+
 
 
 def get_valid_piece_moves(square, piece_type, blockers):
@@ -409,24 +483,21 @@ def get_valid_piece_moves_including_captures(square, piece_type, blockers):
 
     return possible_moves
 
-def get_valid_piece_moves_including_captures_and_skipping_one(square, piece_type, blockers):
+def get_valid_piece_moves_including_captures_one_blocker(square, piece_type, blockers):
     """
-    Generates possible moves for a rook or a bishop on a given square with blockers that we can go through one and the next capture.
+    Generates possible moves for a rook or a bishop on a given square with blockers that we cannot capture.
     """
     def ray_moves(square, direction):
         moves = 0
         r, c = divmod(square, 8)
         dr, dc = direction
         nr, nc = r + dr, c + dc
-        count = 0
         while 0 <= nr < 8 and 0 <= nc < 8:
             index = nr * 8 + nc
             if blockers & (1 << index):
                 # Stop if a blocker is encountered
                 moves |= 1 << index
-                count += 1
-                if count == 2:
-                    continue
+                break
             moves |= 1 << index
             nr += dr
             nc += dc
@@ -444,6 +515,7 @@ def get_valid_piece_moves_including_captures_and_skipping_one(square, piece_type
         possible_moves |= ray_moves(square, direction)
 
     return possible_moves
+
 
 def get_ordered_blockers(square, piece_type):
     '''

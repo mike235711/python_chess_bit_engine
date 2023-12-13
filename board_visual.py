@@ -74,7 +74,7 @@ def play_and_undo_moves(position, depth, screen, square_size, pieces_images, boa
         updated_board = bitboards_to_board(position.bitboard)
         draw_board(screen, updated_board, None, (0, 0))
         pygame.display.flip()
-        time.sleep(0.001)  # Wait for 1 second
+        time.sleep(1)  # Wait for 1 second
 
         # Recursive call to the next depth
         play_and_undo_moves(position, depth - 1, screen, square_size, pieces_images, updated_board, promoting, promotion_color)
@@ -104,19 +104,20 @@ def main():
     promoting_moves = []
 
     # Define the initial board state
-    board = [
-        'wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR',
-        'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP',
-        '0', '0', '0', '0', '0', '0', '0', '0',
-        '0', '0', '0', '0', '0', '0', '0', '0',
-        '0', '0', '0', '0', '0', '0', '0', '0',
-        '0', '0', '0', '0', '0', '0', '0', '0',
-        'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP',
-        'bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'
-    ]
 
     pieces_images = load_pieces_images(square_size)
-    position = BitPosition(board_to_bitboards(board), turn=True)
+    board = [
+    '0', '0', '0', '0', '0', '0', '0', '0',
+    '0', '0', '0', '0', 'wP', '0', 'wP', '0',
+    '0', '0', '0', '0', '0', '0', '0', '0',
+    '0', 'wR', '0', '0', '0', 'bP', '0', 'bK',
+    'wK', 'wP', '0', '0', '0', '0', '0', 'bR',
+    '0', '0', '0', 'bP', '0', '0', '0', '0',
+    '0', '0', 'bP', '0', '0', '0', '0', '0',
+    '0', '0', '0', '0', '0', '0', '0', '0'
+]
+    bitboards_array = board_to_bitboards(board)
+    position = BitPosition(bitboards_array, turn = True, wc = [False, False], bc = [False, False])
 
     while True:
         mouse_pos = pygame.mouse.get_pos()
@@ -127,13 +128,13 @@ def main():
                 sys.exit()
 
             elif e.type == pygame.MOUSEBUTTONDOWN: # Left click down
-                print(position.bitboard)
+                print('checks:', position.current_checks)
+                print('pins:', position.current_pins)
                 selected_pos = get_square_at_pos(mouse_pos, square_size)
                 selected_piece = board[selected_pos[0] * 8 + selected_pos[1]]
                 if selected_piece != '0':
                     dragged_piece = (pieces_images[selected_piece], pieces_images[selected_piece].get_rect(topleft=mouse_pos))
                     board[selected_pos[0] * 8 + selected_pos[1]] = '0'
-                print(position.current_pins)
             elif e.type == pygame.MOUSEBUTTONUP: # Left click up
                 if promoting:
                     choice = None
@@ -167,7 +168,6 @@ def main():
                             valid_moves = list(position.capture_moves()) + list(position.non_capture_moves())
                         else:
                             valid_moves = list(position.in_check_captures()) + list(position.in_check_moves())
-                        print(valid_moves)
                         move_valid = False
                         promoting_moves = []
 
@@ -221,7 +221,7 @@ def main():
                         board = bitboards_to_board(position.bitboard)  # Update board display
 
                 elif e.key == pygame.K_SPACE:  # Press SPACE to start the auto-play and undo
-                    play_and_undo_moves(position, 2, screen, square_size, pieces_images, board, promoting, promotion_color)  # Depth is set to 2 here
+                    play_and_undo_moves(position, 1, screen, square_size, pieces_images, board, promoting, promotion_color)  # Depth is set to 2 here
 
 
         draw_board(screen, board, dragged_piece, mouse_pos)
