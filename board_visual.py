@@ -13,8 +13,6 @@ def parse_arguments():
                         help="Choose to play against the engine or yourself")
     parser.add_argument("--side", choices=['white', 'black'], required=True,
                         help="Choose your side")
-    parser.add_argument("--depth", type=int, default=5,
-                        help="Set the depth of the engine (only applies for engine mode)")
     return parser.parse_args()
 
 
@@ -236,7 +234,7 @@ def main():
                             dragged_piece = None
                             selected_piece = None
                 if  engine_turn:
-                    engine_move = engine.Search(position, args.depth)[4]  # Replace 'engine' with your engine's variable
+                    engine_move = engine.Search(position, 5)[4]  # Replace 'engine' with your engine's variable
                     position.move(engine_move)
                     move_history.append(engine_move)
                     board = bitboards_to_board(position.bitboard)

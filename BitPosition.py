@@ -1950,6 +1950,8 @@ class Engine:
     '''
     def __init__(self, evaluation_func):
         self.evaluation_func = evaluation_func
+        self.current_depth = 1
+        self.last_best_move = None
 
 
     def alpha_beta(self, position, depth, alpha, beta, our_turn):
@@ -1979,13 +1981,14 @@ class Engine:
         if depth > 0:
             value1 = -10004  # This is the best evaluation for us in the child_values (we start at the worst possible evaluation)
             value2 = 10004 # This is the best evaluation for opponent in the child_values (we start at the worst possible evaluation)
-        elif our_turn: # If we are entering quiescence, we have a baseline evaluation as if no captures happened
+        elif our_turn: # If we are in quiescence, we have a baseline evaluation as if no captures happened
             value1 = self.evaluation_func(position)
         else:
             value2 = self.evaluation_func(position)
 
-
         best_move = None
+        if depth == self.current_depth and self.last_best_move != None: # If we are starting an alpha beta search and we have already a previous best we will start with the previous best
+            capture_moves.insert(0, self.last_best_move)
 
         if our_turn:  
             # If we have to move, we want to maximize. This is ensured because the evaluation function takes into account if engine is 
@@ -2045,15 +2048,22 @@ class Engine:
 
         return (x, best_move)
 
-    def Search(self, position, max_depth):
+    def Search(self, position, time_left):
         # alpha is the current best evaluation for white, it will start at -1000
         # beta is the current best evaluation for black, it will start at +1000
         start_time = time.time()
+        time_for_move = self.TimeManager(position, time_left)
         best_move = None
         alpha = -10005
         beta = 10005
-        best_value, best_move = self.alpha_beta(position, max_depth, alpha, beta, our_turn = True)
-        end_time = time.time()
-        elapsed_time = end_time - start_time
+        for depth in range(1,15):
+            self.current_depth = depth
+            best_value, best_move = self.alpha_beta(position, depth, alpha, beta, our_turn = True)
+            self.last_best_move = best_move
+            if time.time() - start_time > time_left:
+                break
 
-        return ["Time taken:", elapsed_time, "seconds", "Best move: ", best_move, "Evaluation: ", best_value, 'Depth:', max_depth]
+        return ["Time taken:", time.time()-start_time, "seconds", "Best move: ", self.last_best_move, "Evaluation: ", best_value, 'Depth:', depth]
+
+    def TimeManager(self, position, time_left):
+        return 5
