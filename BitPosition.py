@@ -1,6 +1,6 @@
-import numpy as np
 import json
 import copy
+import numpy as np
 
 ###################################################
 # BitBoards for Crawlers (Pawns, Knights and King)
@@ -179,7 +179,7 @@ class BitPosition:
         self.bc = bc # [Boolean, Boolean] represinting black kingside/ queenside castling rights
         self.psquare = passant_square # Index of the en passant square (a1 = 0, h8 = 63) if there is no en passant square then it is set to -1.
         self.current_pins = (0,0)
-        self.current_checks = 0    
+        self.current_checks = (0,0,0,0,0,0)    
 
     def king_is_safe_after_passant(self, removed_square_1, removed_square_2):
         '''
@@ -255,6 +255,10 @@ class BitPosition:
                 moveable_squares = long_precomputed_bishop_table[destination][bishop_unfull_rays[destination] & (all_own_pieces_bit_without_king)]
                 if moveable_squares & bitboard[8] != 0: # If there is a bishop giving check
                     return False
+            # King
+            moveable_squares = precomputed_move_tables[5][destination]
+            if moveable_squares & bitboard[11] != 0: # If the king moved next to other king
+                return False
             # Rooks
             if bitboard[9] != 0:
                 moveable_squares = long_precomputed_rook_table[destination][rook_unfull_rays[destination] & (all_own_pieces_bit_without_king)]
@@ -287,6 +291,11 @@ class BitPosition:
                 moveable_squares = long_precomputed_bishop_table[destination][bishop_unfull_rays[destination] & (all_own_pieces_bit_without_king)]
                 if moveable_squares & bitboard[2] != 0: # If there is a bishop giving check
                     return False
+            # King
+            moveable_squares = precomputed_move_tables[5][destination]
+            if moveable_squares & bitboard[5] != 0: # If the king moved next to other king
+                return False
+            
             # Rooks
             if bitboard[3] != 0:
                 moveable_squares = long_precomputed_rook_table[destination][rook_unfull_rays[destination] & (all_own_pieces_bit_without_king)]
@@ -1763,7 +1772,7 @@ class BitPosition:
         self.move_ply_info.append((moving_piece, move.capture, move.prom))
 
         # Update info
-        self.current_checks = 0
+        self.current_checks = (0,0,0,0,0,0,0)
         self.current_pins = (0,0)
         self.turn = not self.turn
 
@@ -1840,8 +1849,8 @@ white_knights = np.array([
     1, 2, 3, 3, 3, 3, 2, 1,
     2, 3, 4, 4, 4, 4, 3, 2,
     3, 4, 5, 5, 5, 5, 4, 3,
-    3, 4, 5, 6, 6, 5, 4, 3,
-    3, 4, 5, 6, 6, 5, 4, 3,
+    3, 4, 5, 5, 5, 5, 4, 3,
+    3, 4, 5, 5, 5, 5, 4, 3,
     3, 4, 5, 5, 5, 5, 4, 3,
     2, 3, 4, 4, 4, 4, 3, 2,
     1, 2, 3, 3, 3, 3, 2, 1
@@ -1862,13 +1871,13 @@ white_bishops = np.array([
 # White Rooks (Valuing open files and back rank protection)
 white_rooks = np.array([
     1, 1, 1, 2, 2, 1, 1, 1,
-    2, 3, 3, 3, 3, 3, 3, 2,
+    2, 2, 2, 2, 2, 2, 2, 2,
     1, 2, 2, 2, 2, 2, 2, 1,
     1, 2, 2, 2, 2, 2, 2, 1,
     1, 2, 2, 2, 2, 2, 2, 1,
     1, 2, 2, 2, 2, 2, 2, 1,
     1, 2, 2, 2, 2, 2, 2, 1, 
-    1, 1, 1, 2, 2, 1, 1, 1
+    1, 1, 2, 4, 4, 3, 1, 1
     ])
 
 # White Queen (General value across the board with slight central preference)
@@ -1905,12 +1914,26 @@ black_king = np.flipud(white_king)
 
 points = (white_pawns, white_knights, white_bishops, white_rooks, white_queen, white_king, black_pawns, black_knights, black_bishops, black_rooks, black_queen, black_king)
 
-def evaluation_function(bitposition):
-    material_value = (200, 400, 400, 500, 900, 1000
-                      -200, -400, -400, -500, -900, 1000)
+def evaluation_function_white(bitposition):
+    material_value = (20, 40, 40, 50, 90, 100,
+                      -20, -40, -40, -50, -90, -100)
     total_eval = 0
     for i, bit in enumerate(bitposition.bitboard):
-        total_eval += points[i][bit_to_numpy_array(bit)] * material_value[i]
+        if i < 6:
+            total_eval += sum(material_value[i]*bit_to_numpy_array(bit)+bit_to_numpy_array(bit)*points[i])
+        else:
+            total_eval += sum(material_value[i]*bit_to_numpy_array(bit)-bit_to_numpy_array(bit)*points[i])
+    return total_eval
+
+def evaluation_function_black(bitposition):
+    material_value = (-20, -40, -40, -50, -90, -100,
+                      20, 40, 40, 50, 90, 100)
+    total_eval = 0
+    for i, bit in enumerate(bitposition.bitboard):
+        if i < 6:
+            total_eval += sum(material_value[i]*bit_to_numpy_array(bit)-bit_to_numpy_array(bit)*points[i])
+        else:
+            total_eval += sum(material_value[i]*bit_to_numpy_array(bit)+bit_to_numpy_array(bit)*points[i])
     return total_eval
 
 
@@ -1918,18 +1941,10 @@ def evaluation_function(bitposition):
 # Search
 #######################################################
 
-Squares_Dict = ['a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1',
-                'a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2',
-                'a3', 'b3', 'c3', 'd3', 'e3', 'f3', 'g3', 'h3',
-                'a4', 'b4', 'c4', 'd4', 'e4', 'f4', 'g4', 'h4',
-                'a5', 'b5', 'c5', 'd5', 'e5', 'f5', 'g5', 'h5',
-                'a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6',
-                'a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7',
-                'a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8']
-
 import time
+import itertools
 
-class HashIterativeEngine:
+class Engine:
     '''
     In this engine a good evaluation for us will be positive and a good evaluation for opponent will be negative.
     '''
@@ -1937,170 +1952,52 @@ class HashIterativeEngine:
         self.evaluation_func = evaluation_func
 
 
-    def alpha_beta(self, position, depth, alpha, beta, our_turn, hash_table, killer1, killer2, killer1_count, killer2_count, iterative_moves, count):
-        count += 1
-
-        # Building hash_table in order to have evaluations of previously computed positions
-        # The hash_keys are strings containing: board, passant_square, player_turn 
-
-        if position.turn == True: # Whose turn it is will be part of the hash keys (True if white's turn)
-            turn = '1'
-        else:
-            turn = '0'
-        hash_key = ''.join([''.join(position.board), str(position.psquare), turn])
-        
-        if hash_key in hash_table.keys():
-            # I think killer counts both equal 0 if this is the first set of moves being calculated.
-            return hash_table[hash_key], 0
-
-        if len(hash_table) == 100:
-            del hash_table[(next(iter(hash_table)))]  # Delete oldest hash_key
-
-        ordered_moves = position.ordered_moves()
-
-        # If we reach a position where game has ended
-            
+    def alpha_beta(self, position, depth, alpha, beta, our_turn):
+        # Captures
+        '''
         if position.three_fold():  # Repetitions
             return 0, 0
-
-        if len(ordered_moves) == 0 and position.checks_pins()[0][0] == 0:  # Stalemate
-            return 0, 0
-
-        if len(ordered_moves) == 0 and our_turn:  # Checkmate against us
-            return -10003, 0
-
-        if len(ordered_moves) == 0 and not our_turn:  # Checkmate against opponent
-            return 10003, 0
+        '''
         
+        is_check = position.is_check()
 
-        # If we reach a quiet position after reaching the max depth, we return the evaluation
-
-        if depth <= 0 and position.quiet() and our_turn:
-            x = self.evaluation_func(position.board)
-            hash_table[hash_key] = x
-            return x, 0
-
-        if depth <= 0 and position.quiet() and not our_turn:
-            # The evaluation function will give the evaluation from the board and the board shows
-            # black as white (since it is black's turn) therefore the evaluation must be the negative
-            # of what is given by the evaluation function.
-            x = -self.evaluation_func(position.board)
-            hash_table[hash_key] = x
-            return x, 0
+        # Quiesence search (Only captures)
+        if depth <= 0 and is_check:
+            capture_moves = position.in_check_captures()
+            non_capture_moves = []
+        elif depth <= 0 and not is_check:
+            capture_moves = position.capture_moves()
+            non_capture_moves = []
+        # Normal search
+        elif is_check: # If we are in check
+            capture_moves = position.in_check_captures()
+            non_capture_moves = position.in_check_moves()
+        else:
+            capture_moves = position.capture_moves()
+            non_capture_moves = position.non_capture_moves()
         
-        # If depth is reached we continue with captures (not pawns), checks and out of attack moves until 
-        # quiet position. Otherwise, we return the evaluation
+        if depth > 0:
+            value1 = -10004  # This is the best evaluation for us in the child_values (we start at the worst possible evaluation)
+            value2 = 10004 # This is the best evaluation for opponent in the child_values (we start at the worst possible evaluation)
+        elif our_turn: # If we are entering quiescence, we have a baseline evaluation as if no captures happened
+            value1 = self.evaluation_func(position)
+        else:
+            value2 = self.evaluation_func(position)
 
-        if depth <= 0 and not position.quiet():  
-            # Quiescence moves
-            original_moves = copy.copy(ordered_moves) # Used for out_of_attack_moves
-            ordered_moves = [move for move in ordered_moves if move.score > 2]
-            # Bad captures have odd scores, the rest of scored moves have even scores, so if all the moves 
-            # in ordered_moves are bad captures, we add a random move. Otherwise forcing these moves may
-            # lead to biased evaluation.
 
-            if depth <= -4:
-                # If depth is <-4 we only consider captures, to ensure we dont end in a infinite loop of checks
-                ordered_moves = [move for move in ordered_moves if move.score != 6]
-
-            contains_not_bad_move = False
-            for move in ordered_moves:
-                if move.score % 2 == 0 and move.score != 8:
-                    # If move has a score of 8 it means it is a pawn capture with check, which isn't
-                    # necessarily a good move
-                    contains_not_bad_move = True
-                    break
-            if not contains_not_bad_move:
-                attacked_squares = position.own_attacked_squares()
-                out_of_attack_movess = out_of_attack_moves(position.board, original_moves, ordered_moves, attacked_squares)
-                if depth > -4:
-                    ordered_moves = ordered_moves + out_of_attack_movess
-                if depth > -2:
-                    # sometimes the position isn't quiet but we can't make a capture or check (the opponent can)
-                    # so we perform only some random moves. This is because we may inevitably in the next move lose
-                    # a piece.
-                    # ordered_moves = ordered_moves + random_moves
-                    save_movess = safe_moves(original_moves, attacked_squares, ordered_moves)
-                    ordered_moves = ordered_moves + save_movess
-                else:
-                    save_movess = safe_moves(original_moves, attacked_squares, ordered_moves)
-                    if save_movess != []:
-                        ordered_moves = ordered_moves + random.sample(save_movess,1)
-            
-
-        if len(ordered_moves) == 0:
-            save_movess = safe_moves(original_moves, attacked_squares, ordered_moves)
-            if save_movess != []:
-                ordered_moves = save_movess
-            else:
-                ordered_moves = original_moves
-
-        if depth <= -6 and our_turn:
-            x = self.evaluation_func(position.board)
-            return x, 0
-
-        if depth <= -6 and not our_turn:
-            # The evaluation function will give the evaluation from the board and the board shows
-            # black as white (since it is black's turn) therefore the evaluation must be the negative
-            # of what is given by the evaluation function.
-            x = -self.evaluation_func(position.board)
-            return x, 0
-        
-        # We set the killer moves if they haven't been set, these are the best moves in the sibling branch
-        
-        if killer1 == None and our_turn: # At the start killer is set to None, so we start with the first move
-            killer1 = ordered_moves[0]
-        
-        elif killer2 == None and not our_turn:
-            killer2 = ordered_moves[0]
-        
-        # Killer_count prevents killer moves from going to different depths
-
-        if our_turn:
-            killer1_count += 1
-        else: 
-            killer2_count += 1
-        
-        if killer1_count == 2:
-            killer1 = ordered_moves[0]
-        
-        if killer2_count == 2:
-            killer2 = ordered_moves[0]
-            
-        # Move killer to first position
-
-        if our_turn and killer1 in ordered_moves:
-            ordered_moves.insert(0, ordered_moves.pop(ordered_moves.index(killer1)))
-
-        elif not our_turn and killer2 in ordered_moves:
-            ordered_moves.insert(0, ordered_moves.pop(ordered_moves.index(killer2)))
-        
-        if count == 1 and len(iterative_moves) != 0:
-            ordered_moves.insert(0, ordered_moves.pop(ordered_moves.index(iterative_moves[0])))
-
-        best_move = ordered_moves[0]
+        best_move = None
 
         if our_turn:  
-            # If we have to move, we want to maximize. This is ensured because board is always from player to move 
-            # perspective as white and when we evaluate a position, depending of the turn we give + or - the evaluation.
-
-            value1 = -10000  # This is the best evaluation for us in the child_values (we start at the worst possible evaluation)
-            for move in ordered_moves:
-                if move == Move(11, 29, '', 0) and depth == 1:
-                    print('yey')
-                if move == Move(29, 43, '', 0) and depth == -1:
-                    print('yey')
-                if move == Move(14, 22, '', 0) and depth == -3:
-                    print('yey')
+            # If we have to move, we want to maximize. This is ensured because the evaluation function takes into account if engine is 
+            # playing as white or not.
+            for move in itertools.chain(capture_moves, non_capture_moves):
                 position.move(move)
-                child_value = self.alpha_beta(position, depth - 1, alpha, beta, False, hash_table, killer1, killer2, killer1_count, killer2_count, iterative_moves, count)[0]
-                killer1_count = 0
+                child_value = self.alpha_beta(position, depth - 1, alpha, beta, False)[0]
                 if child_value > value1:
                     # If we can improve the best value, then we have found a better move in the child values
                     value1 = child_value
                     best_move = move
-                    killer1 = best_move
-                position.pop()
+                position.unmake_move(move)
                 if value1 >= beta:
                     # If our best move is better than the best in another set of moves that lead from a different 
                     # move from opponent, then opponent will choose the other move. So theres no need to calculate in this set
@@ -2109,68 +2006,54 @@ class HashIterativeEngine:
                 alpha = max(alpha, value1) 
 
         else:  # If opponent has to move
-            value2 = 10000 # This is the best evaluation for opponent in the child_values (we start at the worst possible evaluation)
-            for move in ordered_moves:
+            for move in itertools.chain(capture_moves, non_capture_moves):
                 position.move(move)
-                if move == Move(13,20, '', 4) and depth == -2:
-                    print('yay')
-                child_value = self.alpha_beta(position, depth - 1, alpha, beta, True, hash_table, killer1, killer2, killer1_count, killer2_count, iterative_moves, count)[0]
-                killer2_count = 0
+                child_value = self.alpha_beta(position, depth - 1, alpha, beta, True)[0]
                 if child_value < value2:
                     value2 = child_value
                     best_move = move
-                    killer2 = best_move
-                position.pop() 
+                position.unmake_move(move) 
                 if alpha >= value2:
                     # If opponent's best move is better than the best in another set of moves that lead from a different 
                     # move (parent2) from us, then we will choose the other move (parent2). So there's no need to calculate in
                     # this set of child moves any more.
                     break             
                 beta = min(beta, value2)
+        # If we have reached quisence search and there are no captures
+
+        if best_move == None and depth <= 0:
+            return self.evaluation_func(position), 0
+        
+        # If we reach a position where game has ended
+
+        if best_move == None and not is_check:  # Stalemate (There are no captures or non captures and no checks)
+            return 0, 0
+
+        if best_move == None and our_turn and is_check:  # Checkmate against us
+            return -10003, 0
+
+        if best_move == None and not our_turn and is_check:  # Checkmate against opponent
+            return 10003, 0
 
         # If there has been an alpha/beta break, then value1 and value2 are going to be telling the player that moved before,
         # that the move was worse than a previously calculated one (in the same depth).
-        
+
         if our_turn:
             x = value1
         else:
             x = value2
-        hash_table[hash_key] = x
 
         return (x, best_move)
 
-    def Search(self, position, max_time): # max time we want to consume in seconds
+    def Search(self, position, max_depth):
         # alpha is the current best evaluation for white, it will start at -1000
         # beta is the current best evaluation for black, it will start at +1000
         start_time = time.time()
         best_move = None
-        killer1 = None
-        killer2 = None
         alpha = -10005
         beta = 10005
-        iterative_moves = []
-        last_depth = 0
-        for depth in range(100):
-            best_value, best_move = self.alpha_beta(position, depth+1, alpha, beta, our_turn = True, hash_table={}, killer1=killer1, killer2=killer2, killer1_count=0, killer2_count=0, iterative_moves=iterative_moves, count = 0)
-            end_time = time.time()
-            elapsed_time = end_time - start_time
-            iterative_moves = [best_move] # ¡¡¡NO METER SOLO EL PRIMER MOVIMIENTO!!!
-            if elapsed_time >= max_time:
-                last_depth = depth + 1
-                break
-        return ["Time taken:", elapsed_time, "seconds", "Best move: ", best_move, "Evaluation: ", best_value, 'Depth:', last_depth]
+        best_value, best_move = self.alpha_beta(position, max_depth, alpha, beta, our_turn = True)
+        end_time = time.time()
+        elapsed_time = end_time - start_time
 
-    def Tell_Move(move):  # Spit move to UCI
-        square = Squares_Dict[move.i]
-        destination = Squares_Dict[move.j]
-        return 'bestmove '+''.join([square, destination, move.prom])
-    
-
-def tell_move(move):  # Spit move to UCI
-    square = Squares_Dict[move.i]
-    destination = Squares_Dict[move.j]
-    return 'bestmove ' + ''.join([square, destination, move.prom])
-
-def time_management(our_time, increment):
-    time_for_move = our_time/2 + increment
-    return time_for_move
+        return ["Time taken:", elapsed_time, "seconds", "Best move: ", best_move, "Evaluation: ", best_value, 'Depth:', max_depth]

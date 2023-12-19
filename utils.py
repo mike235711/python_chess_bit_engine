@@ -1,4 +1,3 @@
-import numpy as np
 import chess
 import numpy as np
 
