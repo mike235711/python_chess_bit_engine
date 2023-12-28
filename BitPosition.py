@@ -1,6 +1,7 @@
 import json
 import copy
 import numpy as np
+import random
 
 ###################################################
 # BitBoards for Crawlers (Pawns, Knights and King)
@@ -30,11 +31,44 @@ import numpy as np
 # 64. This makes finding the magic number easier, maybe even there's a smart way of ordering the bits for each square
 # without using magic numbers.
 
+###################################
+# Zobrist Hashing Inizialization
+###################################
+
+random_numbers = set()
+random.seed(96620)
+while len(random_numbers) < 801:
+    random_numbers.add(random.randint(1, 2**64 - 1))
+random_numbers = list(random_numbers)
+
+white_pawn_zobrist_numbers = np.array(random_numbers[:64])
+white_knight_zobrist_numbers = np.array(random_numbers[64:2*64])
+white_bishop_zobrist_numbers = np.array(random_numbers[2*64:3*64])
+white_rook_zobrist_numbers = np.array(random_numbers[3*64:4*64])
+white_queen_zobrist_numbers = np.array(random_numbers[4*64:5*64])
+white_king_zobrist_numbers = np.array(random_numbers[5*64:6*64])
+black_pawn_zobrist_numbers = np.array(random_numbers[6*64:7*64])
+black_knight_zobrist_numbers = np.array(random_numbers[7*64:8*64])
+black_bishop_zobrist_numbers = np.array(random_numbers[8*64:9*64])
+black_rook_zobrist_numbers = np.array(random_numbers[9*64:10*64])
+black_queen_zobrist_numbers = np.array(random_numbers[10*64:11*64])
+black_king_zobrist_numbers = np.array(random_numbers[11*64:12*64])
+
+black_to_move_zobrist_number = random_numbers[12*64]
+
+castling_rights_zobrist_numbers = np.array(random_numbers[((12*64)+1):((12*64)+17)])
+
+passant_squares_zobrist_numbers = {-1: 0, 
+                     16 : random_numbers[(12*64)+17], 17 : random_numbers[(12*64)+18], 18 : random_numbers[(12*64)+19], 19 : random_numbers[(12*64)+20], 20 : random_numbers[(12*64)+21], 21 : random_numbers[(12*64)+22], 22 : random_numbers[(12*64)+23], 23: random_numbers[(12*64)+24], 
+                     40 : random_numbers[(12*64)+25], 41 : random_numbers[(12*64)+26], 42 : random_numbers[(12*64)+27], 43 : random_numbers[(12*64)+28], 44 : random_numbers[(12*64)+29], 45 : random_numbers[(12*64)+30], 46 : random_numbers[(12*64)+31], 47 : random_numbers[(12*64)+32]}
+
+zobrist_numbers_pieces = (white_pawn_zobrist_numbers, white_knight_zobrist_numbers, white_bishop_zobrist_numbers, white_rook_zobrist_numbers, 
+                         white_queen_zobrist_numbers, white_king_zobrist_numbers, black_pawn_zobrist_numbers, black_king_zobrist_numbers, 
+                         black_bishop_zobrist_numbers, black_rook_zobrist_numbers, black_queen_zobrist_numbers, black_king_zobrist_numbers)
 
 ####################################
 # Pre-computed crawler tables 
 ####################################
-
 
 
 # Precomputed move tables
@@ -45,15 +79,6 @@ white_pawn_attacks = (512, 1280, 2560, 5120, 10240, 20480, 40960, 16384, 131072,
 black_pawn_moves = (0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824, 2147483648, 4294967296, 8589934592, 17179869184, 34359738368, 68719476736, 137438953472, 274877906944, 549755813888, 1099511627776, 2199023255552, 4398046511104, 8796093022208, 17592186044416, 35184372088832, 70368744177664, 140737488355328, 0, 0, 0, 0, 0, 0, 0, 0)
 black_pawn_attacks = (0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 10, 20, 40, 80, 160, 64, 512, 1280, 2560, 5120, 10240, 20480, 40960, 16384, 131072, 327680, 655360, 1310720, 2621440, 5242880, 10485760, 4194304, 33554432, 83886080, 167772160, 335544320, 671088640, 1342177280, 2684354560, 1073741824, 8589934592, 21474836480, 42949672960, 85899345920, 171798691840, 343597383680, 687194767360, 274877906944, 2199023255552, 5497558138880, 10995116277760, 21990232555520, 43980465111040, 87960930222080, 175921860444160, 70368744177664, 562949953421312, 1407374883553280, 2814749767106560, 5629499534213120, 11258999068426240, 22517998136852480, 45035996273704960, 18014398509481984)
 
-board = [ 'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R',
-         'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P',
-         '0', '0', '0', '0', '0', '0', '0', '0',
-         '0', '0', '0', '0', '0', '0', '0', '0',
-         '0', '0', '0', '0', '0', '0', '0', '0',
-         '0', '0', '0', '0', '0', '0', '0', '0',
-         'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p',
-         'r', 'n', 'b', 'q', 'k', 'b', 'n', 'k' ]
-
 
 ####################################
 # Pre-computed slider tables 
@@ -61,14 +86,10 @@ board = [ 'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R',
 # Number of squares in direction to move from all squares
 rook_unfull_rays = (282578800148862, 565157600297596, 1130315200595066, 2260630401190006, 4521260802379886, 9042521604759646, 18085043209519166, 36170086419038334, 282578800180736, 565157600328704, 1130315200625152, 2260630401218048, 4521260802403840, 9042521604775424, 18085043209518592, 36170086419037696, 282578808340736, 565157608292864, 1130315208328192, 2260630408398848, 4521260808540160, 9042521608822784, 18085043209388032, 36170086418907136, 282580897300736, 565159647117824, 1130317180306432, 2260632246683648, 4521262379438080, 9042522644946944, 18085043175964672, 36170086385483776, 283115671060736, 565681586307584, 1130822006735872, 2261102847592448, 4521664529305600, 9042787892731904, 18085034619584512, 36170077829103616, 420017753620736, 699298018886144, 1260057572672512, 2381576680245248, 4624614895390720, 9110691325681664, 18082844186263552, 36167887395782656, 35466950888980736, 34905104758997504, 34344362452452352, 33222877839362048, 30979908613181440, 26493970160820224, 17522093256097792, 35607136465616896, 9079539427579068672, 8935706818303361536, 8792156787827803136, 8505056726876686336, 7930856604974452736, 6782456361169985536, 4485655873561051136, 9115426935197958144)
 bishop_unfull_rays = (18049651735527936, 70506452091904, 275415828992, 1075975168, 38021120, 8657588224, 2216338399232, 567382630219776, 9024825867763712, 18049651735527424, 70506452221952, 275449643008, 9733406720, 2216342585344, 567382630203392, 1134765260406784, 4512412933816832, 9024825867633664, 18049651768822272, 70515108615168, 2491752130560, 567383701868544, 1134765256220672, 2269530512441344, 2256206450263040, 4512412900526080, 9024834391117824, 18051867805491712, 637888545440768, 1135039602493440, 2269529440784384, 4539058881568768, 1128098963916800, 2256197927833600, 4514594912477184, 9592139778506752, 19184279556981248, 2339762086609920, 4538784537380864, 9077569074761728, 562958610993152, 1125917221986304, 2814792987328512, 5629586008178688, 11259172008099840, 22518341868716544, 9007336962655232, 18014673925310464, 2216338399232, 4432676798464, 11064376819712, 22137335185408, 44272556441600, 87995357200384, 35253226045952, 70506452091904, 567382630219776, 1134765260406784, 2832480465846272, 5667157807464448, 11333774449049600, 22526811443298304, 9024825867763712, 18049651735527936)
-queen_unfull_rays = (18332230535676798, 635664052389500, 1130590616424058, 2260631477165174, 4521260840401006, 9042530262347870, 18087259547918398, 36737469049258110, 9307404667944448, 18614809335856128, 1200821652847104, 2260905850861056, 4521270535810560, 9044737947360768, 18652425839721984, 37304851679444480, 4794991742157568, 9589983475926528, 19179966977150464, 2331145517014016, 4523752560670720, 9609905310691328, 19219808465608704, 38439616931348480, 2538787347563776, 5077572547643904, 10155151571424256, 20312500052175360, 5159150924878848, 10177562247440384, 20354572616749056, 40709145267052544, 1411214634977536, 2821879514141184, 5645416919213056, 11853242626099200, 23705944086286848, 11382549979341824, 22623819156965376, 45247646903865344, 982976364613888, 1825215240872448, 4074850560001024, 8011162688423936, 15883786903490560, 31629033194398208, 27090181148918784, 54182561321093120, 35469167227379968, 34909537435795968, 34355426829272064, 33245015174547456, 31024181169623040, 26581965518020608, 17557346482143744, 35677642917708800, 9080106810209288448, 8936841583563768320, 8794989268293649408, 8510723884684150784, 7942190379423502336, 6804983172613283840, 4494680699428814848, 9133476586933486080)
 rook_full_rays = (72340172838076926, 144680345676153597, 289360691352306939, 578721382704613623, 1157442765409226991, 2314885530818453727, 4629771061636907199, 9259542123273814143, 72340172838141441, 144680345676217602, 289360691352369924, 578721382704674568, 1157442765409283856, 2314885530818502432, 4629771061636939584, 9259542123273813888, 72340172854657281, 144680345692602882, 289360691368494084, 578721382720276488, 1157442765423841296, 2314885530830970912, 4629771061645230144, 9259542123273748608, 72340177082712321, 144680349887234562, 289360695496279044, 578721386714368008, 1157442769150545936, 2314885534022901792, 4629771063767613504, 9259542123257036928, 72341259464802561, 144681423712944642, 289361752209228804, 578722409201797128, 1157443723186933776, 2314886351157207072, 4629771607097753664, 9259542118978846848, 72618349279904001, 144956323094725122, 289632270724367364, 578984165983651848, 1157687956502220816, 2315095537539358752, 4629910699613634624, 9259541023762186368, 143553341945872641, 215330564830528002, 358885010599838724, 645993902138460168, 1220211685215703056, 2368647251370188832, 4665518383679160384, 9259260648297103488, 18302911464433844481, 18231136449196065282, 18087586418720506884, 17800486357769390088, 17226286235867156496, 16077885992062689312, 13781085504453754944, 9187484529235886208)
 bishop_full_rays = (9241421688590303744, 36099303471056128, 141012904249856, 550848566272, 6480472064, 1108177604608, 283691315142656, 72624976668147712, 4620710844295151618, 9241421688590368773, 36099303487963146, 141017232965652, 1659000848424, 283693466779728, 72624976676520096, 145249953336262720, 2310355422147510788, 4620710844311799048, 9241421692918565393, 36100411639206946, 424704217196612, 72625527495610504, 145249955479592976, 290499906664153120, 1155177711057110024, 2310355426409252880, 4620711952330133792, 9241705379636978241, 108724279602332802, 145390965166737412, 290500455356698632, 580999811184992272, 577588851267340304, 1155178802063085600, 2310639079102947392, 4693335752243822976, 9386671504487645697, 326598935265674242, 581140276476643332, 1161999073681608712, 288793334762704928, 577868148797087808, 1227793891648880768, 2455587783297826816, 4911175566595588352, 9822351133174399489, 1197958188344280066, 2323857683139004420, 144117404414255168, 360293502378066048, 720587009051099136, 1441174018118909952, 2882348036221108224, 5764696068147249408, 11529391036782871041, 4611756524879479810, 567382630219904, 1416240237150208, 2833579985862656, 5667164249915392, 11334324221640704, 22667548931719168, 45053622886727936, 18049651735527937)
-queen_full_rays = (9313761861428380670, 180779649147209725, 289501704256556795, 578721933553179895, 1157442771889699055, 2314886638996058335, 4630054752952049855, 9332167099941961855, 4693051017133293059, 9386102034266586375, 325459994840333070, 578862399937640220, 1157444424410132280, 2315169224285282160, 4702396038313459680, 9404792076610076608, 2382695595002168069, 4765391190004401930, 9530782384287059477, 614821794359483434, 1157867469641037908, 2387511058326581416, 4775021017124823120, 9550042029937901728, 1227517888139822345, 2455035776296487442, 4910072647826412836, 9820426766351346249, 1266167048752878738, 2460276499189639204, 4920271519124312136, 9840541934442029200, 649930110732142865, 1299860225776030242, 2600000831312176196, 5272058161445620104, 10544115227674579473, 2641485286422881314, 5210911883574396996, 10421541192660455560, 361411684042608929, 722824471891812930, 1517426162373248132, 3034571949281478664, 6068863523097809168, 12137446670713758241, 5827868887957914690, 11583398706901190788, 287670746360127809, 575624067208594050, 1079472019650937860, 2087167920257370120, 4102559721436811280, 8133343319517438240, 16194909420462031425, 13871017173176583298, 18303478847064064385, 18232552689433215490, 18090419998706369540, 17806153522019305480, 17237620560088797200, 16100553540994408480, 13826139127340482880, 9205534180971414145)
 
 # Combining into a tuple of tuples
-precomputed_move_tables = (white_pawn_moves, knight_moves, bishop_full_rays, rook_full_rays, queen_full_rays, king_moves, white_pawn_attacks, black_pawn_attacks, black_pawn_moves)
-slider_unfull_rays = (bishop_unfull_rays, rook_unfull_rays, queen_unfull_rays)
 white_pawn_doubles = (0,0,0,0,0,0,0,0, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824, 2147483648, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
 black_pawn_doubles = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4294967296, 8589934592, 17179869184, 34359738368, 68719476736, 137438953472, 274877906944, 549755813888, 0,0,0,0,0,0,0,0)
 
@@ -242,12 +263,12 @@ class BitPosition:
             all_own_pieces_bit_without_king = bitboard[0] | bitboard[1] | bitboard[2] | bitboard[3] | bitboard[4] | bitboard[6] | bitboard[7] | bitboard[8] | bitboard[9] | bitboard[10] | bitboard[11] 
             # Pawns
             if bitboard[6] != 0: # For pawns we have to be carefull because they move upwards or downwards depending on whose turn it is
-                attacking_squares = precomputed_move_tables[6][destination]
+                attacking_squares = white_pawn_attacks[destination]
                 if attacking_squares & bitboard[6] != 0:
                     return False
             # Knights
             if bitboard[7] != 0:
-                moveable_squares = precomputed_move_tables[1][destination]
+                moveable_squares = knight_moves[destination]
                 if moveable_squares & bitboard[7] != 0: # If there is a knight giving check
                     return False
             # Bishops
@@ -256,7 +277,7 @@ class BitPosition:
                 if moveable_squares & bitboard[8] != 0: # If there is a bishop giving check
                     return False
             # King
-            moveable_squares = precomputed_move_tables[5][destination]
+            moveable_squares = king_moves[destination]
             if moveable_squares & bitboard[11] != 0: # If the king moved next to other king
                 return False
             # Rooks
@@ -278,12 +299,12 @@ class BitPosition:
             all_own_pieces_bit_without_king = bitboard[0] | bitboard[1] | bitboard[2] | bitboard[3] | bitboard[4] | bitboard[5] | bitboard[6] | bitboard[7] | bitboard[8] | bitboard[9] | bitboard[10]
             # Pawns
             if bitboard[0] != 0: # For pawns we have to be carefull because they move upwards or downwards depending on whose turn it is
-                attacking_squares = precomputed_move_tables[7][destination]
+                attacking_squares = black_pawn_attacks[destination]
                 if attacking_squares & bitboard[0] != 0:
                     return False
             # Knights
             if bitboard[1] != 0:
-                moveable_squares = precomputed_move_tables[1][destination]
+                moveable_squares = knight_moves[destination]
                 if moveable_squares & bitboard[1] != 0: # If there is a knight giving check
                     return False
             # Bishops
@@ -292,7 +313,7 @@ class BitPosition:
                 if moveable_squares & bitboard[2] != 0: # If there is a bishop giving check
                     return False
             # King
-            moveable_squares = precomputed_move_tables[5][destination]
+            moveable_squares = king_moves[destination]
             if moveable_squares & bitboard[5] != 0: # If the king moved next to other king
                 return False
             
@@ -339,13 +360,13 @@ class BitPosition:
                     return True
             # Pawns
             if bitboard[6] != 0: # For pawns we have to be carefull because they move upwards or downwards depending on whose turn it is
-                attacking_squares = precomputed_move_tables[6][king_position]
+                attacking_squares = white_pawn_attacks[king_position]
                 if attacking_squares & bitboard[6] != 0:
                     return True
 
             # Knights
             if bitboard[7] != 0:
-                moveable_squares = precomputed_move_tables[1][king_position]
+                moveable_squares = knight_moves[king_position]
                 if moveable_squares & bitboard[7] != 0: # If there is a knight giving check
                     return True
                 
@@ -374,13 +395,13 @@ class BitPosition:
 
             # Pawns 
             if bitboard[0] != 0: # For pawns we have to be carefull because they move upwards or downwards depending on whose turn it is
-                attacking_squares = precomputed_move_tables[7][king_position]
+                attacking_squares = black_pawn_attacks[king_position]
                 if attacking_squares & bitboard[0] != 0:
                     return True
 
             # Knights 
             if bitboard[1] != 0:
-                moveable_squares = precomputed_move_tables[1][king_position]
+                moveable_squares = knight_moves[king_position]
                 if moveable_squares & bitboard[1] != 0: # If there is a knight giving check
                     return True
 
@@ -491,13 +512,13 @@ class BitPosition:
 
             # Pawns (Note we can only give check with one pawn at a time)
             # For pawns we have to be carefull because they move upwards or downwards depending on whose turn it is
-            attacking_squares = precomputed_move_tables[6][king_position]
+            attacking_squares = white_pawn_attacks[king_position]
             if attacking_squares & bitboard[6] != 0:
                 pawn_checks |= attacking_squares & bitboard[6]
                 num_checks += 1
 
             # Knights (Note we can only give check with one knight at a time)
-            moveable_squares = precomputed_move_tables[1][king_position]
+            moveable_squares = knight_moves[king_position]
             if moveable_squares & bitboard[7] != 0: # If there is a knight giving check
                 knight_checks |= moveable_squares & bitboard[7]
                 num_checks += 1
@@ -559,13 +580,13 @@ class BitPosition:
 
             # Pawns (Note we can only give check with one pawn at a time)
             # For pawns we have to be carefull because they move upwards or downwards depending on whose turn it is
-            attacking_squares = precomputed_move_tables[7][king_position]
+            attacking_squares = black_pawn_attacks[king_position]
             if attacking_squares & bitboard[0] != 0:
                 pawn_checks |= attacking_squares & bitboard[0]
                 num_checks += 1
 
             # Knights (Note we can only give check with one knight at a time)
-            moveable_squares = precomputed_move_tables[1][king_position]
+            moveable_squares = knight_moves[king_position]
             if moveable_squares & bitboard[1] != 0: # If there is a knight giving check
                 knight_checks |= moveable_squares & bitboard[1]
                 num_checks += 1
@@ -639,13 +660,13 @@ class BitPosition:
             
             # Pawns (Note we can only give check with one pawn at a time)
             # For pawns we have to be carefull because they move upwards or downwards depending on whose turn it is
-            attacking_squares = precomputed_move_tables[6][king_position]
+            attacking_squares = white_pawn_attacks[king_position]
             if attacking_squares & bitboard[6] != 0:
                 pawn_checks |= attacking_squares & bitboard[6]
                 num_checks += 1
 
             # Knights (Note we can only give check with one knight at a time)
-            moveable_squares = precomputed_move_tables[1][king_position]
+            moveable_squares = knight_moves[king_position]
             if moveable_squares & bitboard[7] != 0: # If there is a knight giving check
                 knight_checks |= moveable_squares & bitboard[7]
                 num_checks += 1
@@ -690,13 +711,13 @@ class BitPosition:
 
             # Pawns (Note we can only give check with one pawn at a time)
             # For pawns we have to be carefull because they move upwards or downwards depending on whose turn it is
-            attacking_squares = precomputed_move_tables[7][king_position]
+            attacking_squares = black_pawn_attacks[king_position]
             if attacking_squares & bitboard[0] != 0:
                 pawn_checks |= attacking_squares & bitboard[0]
                 num_checks += 1
 
             # Knights (Note we can only give check with one knight at a time)
-            moveable_squares = precomputed_move_tables[1][king_position]
+            moveable_squares = knight_moves[king_position]
             if moveable_squares & bitboard[1] != 0: # If there is a knight giving check
                 knight_checks |= moveable_squares & bitboard[1]
                 num_checks += 1
@@ -755,7 +776,7 @@ class BitPosition:
             piece_bit = bitboard[5]
             origin_square = find_least_significant_bit_set(piece_bit) # We get the indices of the squares pieces of this type are in
             for i in range(6,12):
-                capture_check_squares = precomputed_move_tables[5][origin_square] & bitboard[i] # We get the precomputed moveable squares
+                capture_check_squares = king_moves[origin_square] & bitboard[i] # We get the precomputed moveable squares
                 if capture_check_squares != 0: # If we can capture
                     for destination in get_set_bit_indices(capture_check_squares):
                         if self.king_is_safe(destination):
@@ -767,7 +788,7 @@ class BitPosition:
                 if piece_bit != 0: # If we can't move pawns
                     for origin_square in get_set_bit_indices(piece_bit): # For position of piece of this type
                         for i in range(5):
-                            capture_check_squares = precomputed_move_tables[6][origin_square] & self.current_checks[i] # We get the precomputed moveable squares
+                            capture_check_squares = white_pawn_attacks[origin_square] & self.current_checks[i] # We get the precomputed moveable squares
                             if capture_check_squares != 0: # If we can capture pieces giving check
                                 destination = find_least_significant_bit_set(capture_check_squares) # There's only one check
                                 if destination > 55:
@@ -777,7 +798,7 @@ class BitPosition:
                                     captures.append(Move(origin_square, destination, 1, i + 6))
                                 else:
                                     captures.append(Move(origin_square, destination, 0, i + 6))
-                        if precomputed_move_tables[6][origin_square] & passant_bitboards[self.psquare] != 0 and self.king_is_safe_after_passant(origin_square, self.psquare-8): # En passant capture
+                        if white_pawn_attacks[origin_square] & passant_bitboards[self.psquare] != 0 and self.king_is_safe_after_passant(origin_square, self.psquare-8): # En passant capture
                             captures.append(Move(origin_square, self.psquare, 0, 6))
 
                 # Capturing with knights
@@ -785,7 +806,7 @@ class BitPosition:
                 if piece_bit != 0: # If we have no pieces of the current type
                     for origin_square in get_set_bit_indices(piece_bit): # For position of piece of this type
                         for i in range(5):
-                            capture_check_squares = precomputed_move_tables[1][origin_square] & self.current_checks[i] # We get the precomputed moveable squares
+                            capture_check_squares = knight_moves[origin_square] & self.current_checks[i] # We get the precomputed moveable squares
                             if capture_check_squares != 0: # If we can capture
                                 captures.append(Move(origin_square, find_least_significant_bit_set(capture_check_squares), 0, i + 6))
                 
@@ -826,7 +847,7 @@ class BitPosition:
             piece_bit = bitboard[11]
             origin_square = find_least_significant_bit_set(piece_bit) # We get the indices of the squares pieces of this type are in
             for i in range(5):
-                capture_check_squares = precomputed_move_tables[5][origin_square] & bitboard[i] # We get the precomputed moveable squares
+                capture_check_squares = king_moves[origin_square] & bitboard[i] # We get the precomputed moveable squares
                 if capture_check_squares != 0: # If we can capture
                     for destination in get_set_bit_indices(capture_check_squares):
                         if self.king_is_safe(destination):
@@ -838,7 +859,7 @@ class BitPosition:
                 if piece_bit != 0: # If we can't move pawns
                     for origin_square in get_set_bit_indices(piece_bit): # For position of piece of this type
                         for i in range(5):
-                            capture_check_squares = precomputed_move_tables[7][origin_square] & self.current_checks[i] # We get the precomputed moveable squares
+                            capture_check_squares = black_pawn_attacks[origin_square] & self.current_checks[i] # We get the precomputed moveable squares
                             if capture_check_squares != 0: # If we can capture pieces giving check
                                 destination = find_least_significant_bit_set(capture_check_squares) # There's only one check
                                 if destination > 55:
@@ -848,7 +869,7 @@ class BitPosition:
                                     captures.append(Move(origin_square, destination, 1, i + 6))
                                 else:
                                     captures.append(Move(origin_square, destination, 0, i + 6))
-                        if precomputed_move_tables[7][origin_square] & passant_bitboards[self.psquare] != 0 and self.king_is_safe_after_passant(origin_square, self.psquare+8): # En passant capture (ply_info[-1][2] = psquare)
+                        if black_pawn_attacks[origin_square] & passant_bitboards[self.psquare] != 0 and self.king_is_safe_after_passant(origin_square, self.psquare+8): # En passant capture (ply_info[-1][2] = psquare)
                             captures.append(Move(origin_square, self.psquare, 0, 6))
 
                 # Capturing with knights
@@ -856,7 +877,7 @@ class BitPosition:
                 if piece_bit != 0: # If we have no pieces of the current type
                     for origin_square in get_set_bit_indices(piece_bit): # For position of piece of this type
                         for i in range(5):
-                            capture_check_squares = precomputed_move_tables[1][origin_square] & self.current_checks[i] # We get the precomputed moveable squares
+                            capture_check_squares = knight_moves[origin_square] & self.current_checks[i] # We get the precomputed moveable squares
                             if capture_check_squares != 0: # If we can capture
                                 captures.append(Move(origin_square, find_least_significant_bit_set(capture_check_squares), 0, i + 6))
                 
@@ -911,8 +932,8 @@ class BitPosition:
                 if piece_bit != 0: # If we can't move pawns
                     pawn_indices = get_set_bit_indices(piece_bit) # The indices of the squares the pawns are in
                     for origin_square in pawn_indices: # For position of piece of this type
-                        if precomputed_move_tables[0][origin_square] & all_pieces_bit == 0: # We can move the pawn
-                            moveable_check_squares = precomputed_move_tables[0][origin_square] & rays # We get the precomputed moveable squares
+                        if white_pawn_moves[origin_square] & all_pieces_bit == 0: # We can move the pawn
+                            moveable_check_squares = white_pawn_moves[origin_square] & rays # We get the precomputed moveable squares
                             if moveable_check_squares != 0: # If we can capture pieces giving check
                                 for destination in get_set_bit_indices(moveable_check_squares):
                                     if destination > 55:
@@ -930,7 +951,7 @@ class BitPosition:
                 if piece_bit != 0: # If we have no pieces of the current type
                     bit_indices = get_set_bit_indices(piece_bit) # We get the indices of the squares pieces of this type are in
                     for origin_square in bit_indices: # For position of piece of this type
-                        block_check_squares = precomputed_move_tables[1][origin_square] & rays # We get the precomputed moveable squares
+                        block_check_squares = knight_moves[origin_square] & rays # We get the precomputed moveable squares
                         if block_check_squares != 0: # If we can capture
                             for destination in get_set_bit_indices(block_check_squares):
                                 yield Move(origin_square, destination, 0, 0) 
@@ -970,7 +991,7 @@ class BitPosition:
             # Moving king
             piece_bit = bitboard[5]
             origin_square = find_least_significant_bit_set(piece_bit) # We get the indices of the squares pieces of this type are in
-            non_capture_check_squares = precomputed_move_tables[5][origin_square] & ~(all_pieces_bit| rays) # We get the precomputed moveable squares
+            non_capture_check_squares = king_moves[origin_square] & ~(all_pieces_bit| rays) # We get the precomputed moveable squares
             if non_capture_check_squares != 0: # If we can capture
                 for destination in get_set_bit_indices(non_capture_check_squares):
                     if self.king_is_safe(destination):
@@ -986,8 +1007,8 @@ class BitPosition:
                 if piece_bit != 0: # If we can't move pawns
                     pawn_indices = get_set_bit_indices(piece_bit) # The indices of the squares the pawns are in
                     for origin_square in pawn_indices: # For position of piece of this type
-                        if precomputed_move_tables[8][origin_square] & all_pieces_bit == 0: # We can move the pawn
-                            moveable_check_squares = precomputed_move_tables[8][origin_square] & rays # We get the precomputed moveable squares
+                        if black_pawn_moves[origin_square] & all_pieces_bit == 0: # We can move the pawn
+                            moveable_check_squares = black_pawn_moves[origin_square] & rays # We get the precomputed moveable squares
                             if moveable_check_squares != 0: # If we can capture pieces giving check
                                 for destination in get_set_bit_indices(moveable_check_squares):
                                     if destination < 8:
@@ -1005,7 +1026,7 @@ class BitPosition:
                 if piece_bit != 0: # If we have no pieces of the current type
                     bit_indices = get_set_bit_indices(piece_bit) # We get the indices of the squares pieces of this type are in
                     for origin_square in bit_indices: # For position of piece of this type
-                        block_check_squares = precomputed_move_tables[1][origin_square] & rays # We get the precomputed moveable squares
+                        block_check_squares = knight_moves[origin_square] & rays # We get the precomputed moveable squares
                         if block_check_squares != 0: # If we can capture
                             for destination in get_set_bit_indices(block_check_squares):
                                 yield Move(origin_square, destination, 0, 0) 
@@ -1045,7 +1066,7 @@ class BitPosition:
             # Moving king
             piece_bit = bitboard[11]
             origin_square = find_least_significant_bit_set(piece_bit) # We get the indices of the squares pieces of this type are in
-            non_capture_check_squares = precomputed_move_tables[5][origin_square] & ~(all_pieces_bit| rays) # We get the precomputed moveable squares
+            non_capture_check_squares = king_moves[origin_square] & ~(all_pieces_bit| rays) # We get the precomputed moveable squares
             if non_capture_check_squares != 0: # If we can capture
                 for destination in get_set_bit_indices(non_capture_check_squares):
                     if self.king_is_safe(destination):
@@ -1075,25 +1096,25 @@ class BitPosition:
             if piece_bit != 0: # If we have no pieces of the current type
                 bit_indices = get_set_bit_indices(piece_bit) # We get the indices of the squares pieces of this type are in
                 for origin_square in bit_indices: # For position of piece of this type
-                    moveable_squares = precomputed_move_tables[1][origin_square] # We get the precomputed moveable squares
+                    moveable_squares = knight_moves[origin_square] # We get the precomputed moveable squares
                     if moveable_squares & all_opp_pieces_bit != 0: # Current piece can't capture anything
                         for index in range(6,11): # For each of our opponent pieces, except king
                             capture_squares = moveable_squares & bitboard[index] # We get only squares in which opponent pieces are
                             if capture_squares != 0: # If we can capture
                                 for destination in get_set_bit_indices(capture_squares):
-                                    captures.append(Move(origin_square, destination, 0, index)) # non-checks will have even is_check attribute 
+                                    captures.append((index-1, Move(origin_square, destination, 0, index))) # non-checks will have even is_check attribute 
 
             # Capturing with king
             piece_bit = bitboard[5]
             origin_square = find_least_significant_bit_set(piece_bit) # We get the indices of the squares pieces of this type are in
-            moveable_squares = precomputed_move_tables[5][origin_square] # We get the precomputed moveable squares
+            moveable_squares = king_moves[origin_square] # We get the precomputed moveable squares
             if moveable_squares & all_opp_pieces_bit != 0: # Current piece can't capture anything
                 for index in range(6,11): # For each of our opponent pieces, except king
                     capture_squares = moveable_squares & bitboard[index] # We get only squares in which opponent pieces are
                     if capture_squares != 0: # If we can capture
                         for destination in get_set_bit_indices(capture_squares):
                             if self.king_is_safe(destination):
-                                captures.append(Move(origin_square, destination, 0, index))
+                                captures.append((index, Move(origin_square, destination, 0, index)))
 
             # Capturing with rook that are not pinned
             piece_bit = bitboard[3] & ~full_pins
@@ -1106,7 +1127,7 @@ class BitPosition:
                             capture_squares = moveable_squares & bitboard[index]
                             destination_bits = get_set_bit_indices(capture_squares)
                             for destination in destination_bits:
-                                captures.append(Move(origin_square, destination, 0, index)) # checks will have odd is_check attribute
+                                captures.append((index-3, Move(origin_square, destination, 0, index))) # checks will have odd is_check attribute
 
             # Capturing with bishop that are not pinned
             piece_bit = bitboard[2] & ~full_pins
@@ -1119,7 +1140,7 @@ class BitPosition:
                             capture_squares = moveable_squares & bitboard[index]
                             destination_bits = get_set_bit_indices(capture_squares)
                             for destination in destination_bits:
-                                captures.append(Move(origin_square, destination, 0, index)) # checks will have odd is_check attribute
+                                captures.append((index-2, Move(origin_square, destination, 0, index))) # checks will have odd is_check attribute
             
             # Capturing with queen that are not pinned
             piece_bit = bitboard[4] & ~full_pins
@@ -1133,26 +1154,26 @@ class BitPosition:
                             capture_squares = moveable_squares & bitboard[index]
                             destination_bits = get_set_bit_indices(capture_squares)
                             for destination in destination_bits:
-                                captures.append(Move(origin_square, destination, 0, index)) # checks will have odd is_check attribute
+                                captures.append((index-4, Move(origin_square, destination, 0, index))) # checks will have odd is_check attribute
             
             # Capturing with pawns that are not pinned
             piece_bit = bitboard[0] & ~full_pins
             if piece_bit != 0: # If we can't move pawns
                 pawn_indices = get_set_bit_indices(piece_bit) # The indices of the squares the pawns are in
                 for origin_square in pawn_indices: # For position of piece of this type
-                    attacking_squares = precomputed_move_tables[6][origin_square] # We get the precomputed moveable squares
+                    attacking_squares = white_pawn_attacks[origin_square] # We get the precomputed moveable squares
                     if attacking_squares & all_opp_pieces_bit != 0: # Current piece can't capture anything
                         for index in range(6,11): # For each of our opponent pieces, except king
                             capture_squares = attacking_squares & bitboard[index] # We get only squares in which opponent pieces are
                             if capture_squares != 0: # If we can capture
                                 for destination in get_set_bit_indices(capture_squares):
                                     if destination > 55:
-                                        captures.extend([Move(origin_square, destination, 4, index), Move(origin_square, destination, 3, index), 
-                                                        Move(origin_square, destination, 2, index), Move(origin_square, destination, 1, index)])
+                                        captures.extend([(index, Move(origin_square, destination, 4, index)), (index, Move(origin_square, destination, 3, index)), 
+                                                        (index, Move(origin_square, destination, 2, index)), (index, Move(origin_square, destination, 1, index))])
                                     else:
-                                        captures.append(Move(origin_square, destination, 0, index)) # checks will have odd is_check attribute
+                                        captures.append((index, Move(origin_square, destination, 0, index))) # checks will have odd is_check attribute
                     if attacking_squares & passant_bitboards[self.psquare] != 0 and self.king_is_safe_after_passant(origin_square, self.psquare-8): # En passant capture (ply_info[-1][2] = psquare)
-                        captures.append(Move(origin_square, self.psquare, 0, 6))
+                        captures.append((0, Move(origin_square, self.psquare, 0, 6)))
 
 
             # Capturing with pinned pieces
@@ -1168,7 +1189,7 @@ class BitPosition:
                             capture_squares = moveable_squares & bitboard[index]
                             destination_bits = get_set_bit_indices(capture_squares)
                             for destination in destination_bits:
-                                captures.append(Move(origin_square, destination, 0, index)) # checks will have odd is_check attribute
+                                captures.append((index-2, Move(origin_square, destination, 0, index))) # checks will have odd is_check attribute
             
             # Capturing with rook that is pinned
             piece_bit = bitboard[3] & straight_pins
@@ -1181,7 +1202,7 @@ class BitPosition:
                             capture_squares = moveable_squares & bitboard[index]
                             destination_bits = get_set_bit_indices(capture_squares)
                             for destination in destination_bits:
-                                captures.append(Move(origin_square, destination, 0, index)) # checks will have odd is_check attribute
+                                captures.append((index-3, Move(origin_square, destination, 0, index))) # checks will have odd is_check attribute
 
             # Capturing with queen that is pinned
             piece_bit = bitboard[4] & full_pins
@@ -1195,31 +1216,33 @@ class BitPosition:
                             capture_squares = diag_moveable_squares & bitboard[index]
                             destination_bits = get_set_bit_indices(capture_squares)
                             for destination in destination_bits:
-                                captures.append(Move(origin_square, destination, 0, index)) # checks will have odd is_check attribute
+                                captures.append((index-4,Move(origin_square, destination, 0, index))) # checks will have odd is_check attribute
                     if straight_moveable_squares & all_opp_pieces_bit != 0:
                         for index in range(6,11):
                             capture_squares = straight_moveable_squares & bitboard[index]
                             destination_bits = get_set_bit_indices(capture_squares)
                             for destination in destination_bits:
-                                captures.append(Move(origin_square, destination, 0, index)) # checks will have odd is_check attribute
+                                captures.append((index-4, Move(origin_square, destination, 0, index))) # checks will have odd is_check attribute
             
             # Capturing with pawns that are pinned
             piece_bit = bitboard[0] & diagonal_pins
             if piece_bit != 0: # If we can't move pawns
                 pawn_indices = get_set_bit_indices(piece_bit) # The indices of the squares the pawns are in
                 for origin_square in pawn_indices: # For position of piece of this type
-                    attacking_squares = precomputed_move_tables[6][origin_square] & diagonal_pins # We get the precomputed moveable squares
+                    attacking_squares = white_pawn_attacks[origin_square] & diagonal_pins # We get the precomputed moveable squares
                     if attacking_squares & all_opp_pieces_bit != 0: # Current piece can't capture anything
                         for index in range(6,11): # For each of our opponent pieces, except king
                             capture_squares = attacking_squares & bitboard[index] # We get only squares in which opponent pieces are
                             if capture_squares != 0: # If we can capture
                                 for destination in get_set_bit_indices(capture_squares):
                                     if destination > 55:
-                                        captures.extend([Move(origin_square, destination, 4, index), Move(origin_square, destination, 3, index), 
-                                                        Move(origin_square, destination, 2, index), Move(origin_square, destination, 1, index)])
+                                        captures.extend([(index, Move(origin_square, destination, 4, index)), (index, Move(origin_square, destination, 3, index)), 
+                                                        (index, Move(origin_square, destination, 2, index)), (index, Move(origin_square, destination, 1, index))])
                                     else:
-                                        captures.append(Move(origin_square, destination, 0, index)) # checks will have odd is_check attribute
-        
+                                        captures.append((index, Move(origin_square, destination, 0, index))) # checks will have odd is_check attribute
+
+            return [move[1] for move in sorted(captures, key=lambda move: move[0], reverse=True)] # return the moves ordered in terms of the score and make is_check = 0 for all
+
         else: # Blacks turn
             all_opp_pieces_bit = bitboard[0] | bitboard[1] | bitboard[2] | bitboard[3] | bitboard[4] | bitboard[5]
             all_own_pieces_bit = bitboard[6] | bitboard[7] | bitboard[8] | bitboard[9] | bitboard[10] | bitboard[11]
@@ -1230,25 +1253,25 @@ class BitPosition:
             if piece_bit != 0: # If we have no pieces of the current type
                 bit_indices = get_set_bit_indices(piece_bit) # We get the indices of the squares pieces of this type are in
                 for origin_square in bit_indices: # For position of piece of this type
-                    moveable_squares = precomputed_move_tables[1][origin_square] # We get the precomputed moveable squares
+                    moveable_squares = knight_moves[origin_square] # We get the precomputed moveable squares
                     if moveable_squares & all_opp_pieces_bit != 0: # Current piece can't capture anything
                         for index in range(5): # For each of our opponent pieces, except king
                             capture_squares = moveable_squares & bitboard[index] # We get only squares in which opponent pieces are
                             if capture_squares != 0: # If we can capture
                                 for destination in get_set_bit_indices(capture_squares):
-                                    captures.append(Move(origin_square, destination, 0, index+6)) # non-checks will have even is_check attribute 
+                                    captures.append((index-1, Move(origin_square, destination, 0, index+6))) # non-checks will have even is_check attribute 
 
             # Capturing with king
             piece_bit = bitboard[11]
             origin_square = find_least_significant_bit_set(piece_bit) # We get the indices of the squares pieces of this type are in
-            moveable_squares = precomputed_move_tables[5][origin_square] # We get the precomputed moveable squares
+            moveable_squares = king_moves[origin_square] # We get the precomputed moveable squares
             if moveable_squares & all_opp_pieces_bit != 0: # Current piece can't capture anything
                 for index in range(5): # For each of our opponent pieces, except king
                     capture_squares = moveable_squares & bitboard[index] # We get only squares in which opponent pieces are
                     if capture_squares != 0: # If we can capture
                         for destination in get_set_bit_indices(capture_squares):
                             if self.king_is_safe(destination):
-                                captures.append(Move(origin_square, destination, 0, index+6))
+                                captures.append((index, Move(origin_square, destination, 0, index+6)))
 
             # Capturing with rook that are not pinned
             piece_bit = bitboard[9] & ~full_pins
@@ -1261,7 +1284,7 @@ class BitPosition:
                             capture_squares = moveable_squares & bitboard[index]
                             destination_bits = get_set_bit_indices(capture_squares)
                             for destination in destination_bits:
-                                captures.append(Move(origin_square, destination, 0, index+6)) # checks will have odd is_check attribute
+                                captures.append((index-3, Move(origin_square, destination, 0, index+6))) # checks will have odd is_check attribute
 
             # Capturing with bishop that are not pinned
             piece_bit = bitboard[8] & ~full_pins
@@ -1274,7 +1297,7 @@ class BitPosition:
                             capture_squares = moveable_squares & bitboard[index]
                             destination_bits = get_set_bit_indices(capture_squares)
                             for destination in destination_bits:
-                                captures.append(Move(origin_square, destination, 0, index+6)) # checks will have odd is_check attribute
+                                captures.append((index-2, Move(origin_square, destination, 0, index+6))) # checks will have odd is_check attribute
             
             # Capturing with queen that are not pinned
             piece_bit = bitboard[10] & ~full_pins
@@ -1288,27 +1311,27 @@ class BitPosition:
                             capture_squares = moveable_squares & bitboard[index]
                             destination_bits = get_set_bit_indices(capture_squares)
                             for destination in destination_bits:
-                                captures.append(Move(origin_square, destination, 0, index+6)) # checks will have odd is_check attribute
+                                captures.append((index-4, Move(origin_square, destination, 0, index+6))) # checks will have odd is_check attribute
             
             # Capturing with pawns that are not pinned
             piece_bit = bitboard[6] & ~full_pins
             if piece_bit != 0: # If we can't move pawns
                 pawn_indices = get_set_bit_indices(piece_bit) # The indices of the squares the pawns are in
                 for origin_square in pawn_indices: # For position of piece of this type
-                    attacking_squares = precomputed_move_tables[7][origin_square] # We get the precomputed moveable squares
+                    attacking_squares = black_pawn_attacks[origin_square] # We get the precomputed moveable squares
                     if attacking_squares & all_opp_pieces_bit != 0: # Current piece can't capture anything
                         for index in range(5): # For each of our opponent pieces, except king
                             capture_squares = attacking_squares & bitboard[index] # We get only squares in which opponent pieces are
                             if capture_squares != 0: # If we can capture
                                 for destination in get_set_bit_indices(capture_squares):
                                     if destination < 8:
-                                        captures.extend([Move(origin_square, destination, 4, index+6), Move(origin_square, destination, 3, index+6), 
-                                                        Move(origin_square, destination, 2, index+6), Move(origin_square, destination, 1, index+6)])
+                                        captures.extend([(index, Move(origin_square, destination, 4, index+6)), (index, Move(origin_square, destination, 3, index+6)), 
+                                                        (index, Move(origin_square, destination, 2, index+6)), (index, Move(origin_square, destination, 1, index+6))])
                                     else:
-                                        captures.append(Move(origin_square, destination, 0, index+6)) # checks will have odd is_check attribute
+                                        captures.append((index, Move(origin_square, destination, 0, index+6))) # checks will have odd is_check attribute
 
                     if attacking_squares & passant_bitboards[self.psquare] != 0 and self.king_is_safe_after_passant(origin_square, self.psquare+8): # En passant capture (ply_info[-1][2] = psquare)
-                        captures.append(Move(origin_square, self.psquare, 0, 6))
+                        captures.append((0, Move(origin_square, self.psquare, 0, 6)))
 
 
             # Capturing with pinned pieces
@@ -1324,7 +1347,7 @@ class BitPosition:
                             capture_squares = moveable_squares & bitboard[index]
                             destination_bits = get_set_bit_indices(capture_squares)
                             for destination in destination_bits:
-                                captures.append(Move(origin_square, destination, 0, index+6)) # checks will have odd is_check attribute
+                                captures.append((index-2, Move(origin_square, destination, 0, index+6))) # checks will have odd is_check attribute
 
             # Capturing with rook that are pinned
             piece_bit = bitboard[9] & straight_pins
@@ -1337,7 +1360,7 @@ class BitPosition:
                             capture_squares = moveable_squares & bitboard[index]
                             destination_bits = get_set_bit_indices(capture_squares)
                             for destination in destination_bits:
-                                captures.append(Move(origin_square, destination, 0, index+6)) # checks will have odd is_check attribute
+                                captures.append((index-3, Move(origin_square, destination, 0, index+6))) # checks will have odd is_check attribute
             
             # Capturing with queen that are pinned
             piece_bit = bitboard[10] & full_pins
@@ -1351,32 +1374,32 @@ class BitPosition:
                             capture_squares = diagonal_moveable_squares & bitboard[index]
                             destination_bits = get_set_bit_indices(capture_squares)
                             for destination in destination_bits:
-                                captures.append(Move(origin_square, destination, 0, index+6)) # checks will have odd is_check attribute
+                                captures.append((index-4, Move(origin_square, destination, 0, index+6))) # checks will have odd is_check attribute
                     if straight_moveable_squares & all_opp_pieces_bit != 0:
                         for index in range(5):
                             capture_squares = straight_moveable_squares & bitboard[index]
                             destination_bits = get_set_bit_indices(capture_squares)
                             for destination in destination_bits:
-                                captures.append(Move(origin_square, destination, 0, index+6)) # checks will have odd is_check attribute
+                                captures.append((index-4, Move(origin_square, destination, 0, index+6))) # checks will have odd is_check attribute
             
             # Capturing with pawns that are pinned
             piece_bit = bitboard[6] & diagonal_pins
             if piece_bit != 0: # If we can't move pawns
                 pawn_indices = get_set_bit_indices(piece_bit) # The indices of the squares the pawns are in
                 for origin_square in pawn_indices: # For position of piece of this type
-                    attacking_squares = precomputed_move_tables[7][origin_square] & diagonal_pins # We get the precomputed moveable squares
+                    attacking_squares = black_pawn_attacks[origin_square] & diagonal_pins # We get the precomputed moveable squares
                     if attacking_squares & all_opp_pieces_bit != 0: # Current piece can't capture anything
                         for index in range(5): # For each of our opponent pieces, except king
                             capture_squares = attacking_squares & bitboard[index] # We get only squares in which opponent pieces are
                             if capture_squares != 0: # If we can capture
                                 for destination in get_set_bit_indices(capture_squares):
                                     if destination < 8:
-                                        captures.extend([Move(origin_square, destination, 4, index+6), Move(origin_square, destination, 3, index+6), 
-                                                        Move(origin_square, destination, 2, index+6), Move(origin_square, destination, 1, index+6)])
+                                        captures.extend([(index, Move(origin_square, destination, 4, index+6)), (index, Move(origin_square, destination, 3, index+6)), 
+                                                        (index, Move(origin_square, destination, 2, index+6)), (index, Move(origin_square, destination, 1, index+6))])
                                     else:
-                                        captures.append(Move(origin_square, destination, 0, index+6)) # checks will have odd is_check attribute
+                                        captures.append((index, Move(origin_square, destination, 0, index+6))) # checks will have odd is_check attribute
 
-        return [move for move in sorted(captures, key=lambda move: move.capture, reverse=True)] # return the moves ordered in terms of the score and make is_check = 0 for all
+            return [move[1] for move in sorted(captures, key=lambda move: move[0], reverse=True)] # return the moves ordered in terms of the score and make is_check = 0 for all
     
     def non_capture_moves(self):
         '''
@@ -1397,7 +1420,7 @@ class BitPosition:
             piece_bit = bitboard[1] & ~full_pins
             if piece_bit != 0:
                 for origin_square in get_set_bit_indices(piece_bit): # For position of piece of this type
-                    moveable_squares = precomputed_move_tables[1][origin_square] & ~all_pieces_bit # We get the precomputed moveable squares, note captures are computed on capture_moves().
+                    moveable_squares = knight_moves[origin_square] & ~all_pieces_bit # We get the precomputed moveable squares, note captures are computed on capture_moves().
                     if moveable_squares != 0: # If we can move our piece
                         for destination in get_set_bit_indices(moveable_squares): # get_set_bit_indices is a generator so yielding bellow makes it more efficient
                             yield Move(origin_square, destination, 0, 0)
@@ -1405,7 +1428,7 @@ class BitPosition:
             # King 
             piece_bit = bitboard[5]
             origin_square = find_least_significant_bit_set(piece_bit) # For position of piece of this type
-            moveable_squares = precomputed_move_tables[5][origin_square] & ~all_pieces_bit # We get the precomputed moveable squares, note captures are computed on capture_moves().
+            moveable_squares = king_moves[origin_square] & ~all_pieces_bit # We get the precomputed moveable squares, note captures are computed on capture_moves().
             if moveable_squares != 0: # If we can move our piece
                 if self.wc[0]: # If its whites turn with kingside castling rights (ply_info[-1][0] = wc)
                     if all_pieces_bit & 96 == 0: # If pieces are not blocking
@@ -1425,7 +1448,7 @@ class BitPosition:
             piece_bit = bitboard[0] & ~full_pins
             if piece_bit != 0:
                 for origin_square in get_set_bit_indices(piece_bit): # For position of piece of this type
-                    moveable_squares = precomputed_move_tables[0][origin_square] & ~all_pieces_bit # We get rid of the squares in which our own or opp pieces are
+                    moveable_squares = white_pawn_moves[origin_square] & ~all_pieces_bit # We get rid of the squares in which our own or opp pieces are
                     if moveable_squares != 0:
                         for destination in get_set_bit_indices(moveable_squares): # Promotions
                             if destination > 55:
@@ -1481,7 +1504,7 @@ class BitPosition:
             piece_bit = bitboard[0] & straight_pins
             if piece_bit != 0:
                 for origin_square in get_set_bit_indices(piece_bit): # For position of piece of this type
-                    moveable_squares = precomputed_move_tables[0][origin_square] & ~all_pieces_bit & straight_pins # We get rid of the squares in which our own or opp pieces are
+                    moveable_squares = white_pawn_moves[origin_square] & ~all_pieces_bit & straight_pins # We get rid of the squares in which our own or opp pieces are
                     if moveable_squares != 0:
                         for destination in get_set_bit_indices(moveable_squares):
                             yield Move(origin_square, destination, 0, 0)
@@ -1537,7 +1560,7 @@ class BitPosition:
             piece_bit = bitboard[7] & ~full_pins
             if piece_bit != 0:
                 for origin_square in get_set_bit_indices(piece_bit): # For position of piece of this type
-                    moveable_squares = precomputed_move_tables[1][origin_square] & ~all_pieces_bit # We get the precomputed moveable squares, note captures are computed on capture_moves().
+                    moveable_squares = knight_moves[origin_square] & ~all_pieces_bit # We get the precomputed moveable squares, note captures are computed on capture_moves().
                     if moveable_squares != 0: # If we can move our piece
                         for destination in get_set_bit_indices(moveable_squares): # get_set_bit_indices is a generator so yielding bellow makes it more efficient
                             yield Move(origin_square, destination, 0, 0)
@@ -1545,7 +1568,7 @@ class BitPosition:
             # King 
             piece_bit = bitboard[11]
             origin_square = find_least_significant_bit_set(piece_bit) # For position of piece of this type
-            moveable_squares = precomputed_move_tables[5][origin_square] & ~all_pieces_bit # We get the precomputed moveable squares, note captures are computed on capture_moves().
+            moveable_squares = king_moves[origin_square] & ~all_pieces_bit # We get the precomputed moveable squares, note captures are computed on capture_moves().
             if moveable_squares != 0: # If we can move our piece
                 if self.bc[0]: # If it's black turn with kingside castling rights (ply_info[-1][1] = bc)
                     if all_pieces_bit & 6917529027641081856 == 0:
@@ -1565,7 +1588,7 @@ class BitPosition:
             piece_bit = bitboard[6] & ~full_pins
             if piece_bit != 0:
                 for origin_square in get_set_bit_indices(piece_bit): # For position of piece of this type
-                    moveable_squares = precomputed_move_tables[8][origin_square] & ~all_pieces_bit # We get rid of the squares in which our own or opp pieces are
+                    moveable_squares = black_pawn_moves[origin_square] & ~all_pieces_bit # We get rid of the squares in which our own or opp pieces are
                     if moveable_squares != 0:
                         for destination in get_set_bit_indices(moveable_squares): # Promotions
                             if destination < 8:
@@ -1621,7 +1644,7 @@ class BitPosition:
             piece_bit = bitboard[6] & straight_pins
             if piece_bit != 0:
                 for origin_square in get_set_bit_indices(piece_bit): # For position of piece of this type
-                    moveable_squares = precomputed_move_tables[8][origin_square] & ~all_pieces_bit & straight_pins # We get rid of the squares in which our own or opp pieces are
+                    moveable_squares = black_pawn_moves[origin_square] & ~all_pieces_bit & straight_pins # We get rid of the squares in which our own or opp pieces are
                     if moveable_squares != 0:
                         for destination in get_set_bit_indices(moveable_squares):
                             yield Move(origin_square, destination, 0, 0)
@@ -1937,9 +1960,35 @@ def evaluation_function_black(bitposition):
     return total_eval
 
 
-#######################################################
+######################################################
+# Zobrist Hashing
+######################################################
+
+
+def position_to_zobrist_key(bitposition):
+    key = 0
+    for i, bit in enumerate(bitposition.bitboard):
+        array = bit_to_numpy_array(bit) * zobrist_numbers_pieces[i]
+        for element in array:
+            if element != 0:
+                key ^= element
+    if not bitposition.turn: # If black is moving
+        key ^= black_to_move_zobrist_number
+    # Castling key (we first get a 16 bit integer representing the castling rights)
+    castling_bit = bitposition.wc[0] << 3
+    castling_bit |= bitposition.wc[1] << 2
+    castling_bit |= bitposition.bc[0] << 1
+    castling_bit |= bitposition.bc[1] << 0
+    key ^= castling_rights_zobrist_numbers[castling_bit]
+    # Passant key
+    key ^= passant_squares_zobrist_numbers[bitposition.passant_square]
+    return key
+
+
+
+######################################################
 # Search
-#######################################################
+######################################################
 
 import time
 import itertools
@@ -1952,6 +2001,7 @@ class Engine:
         self.evaluation_func = evaluation_func
         self.current_depth = 1
         self.last_best_move = None
+        self.hash_table = {}
 
 
     def alpha_beta(self, position, depth, alpha, beta, our_turn):
@@ -2063,7 +2113,7 @@ class Engine:
             if time.time() - start_time > time_left:
                 break
 
-        return ["Time taken:", time.time()-start_time, "seconds", "Best move: ", self.last_best_move, "Evaluation: ", best_value, 'Depth:', depth]
+        return ["Time taken:", time.time() - start_time, "seconds", "Best move: ", self.last_best_move, "Evaluation: ", best_value, 'Depth:', depth]
 
     def TimeManager(self, position, time_left):
         return 5
