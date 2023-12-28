@@ -43,7 +43,7 @@ def load_pieces_images(square_size):
     pieces_im = ['wR', 'wN', 'wB', 'wQ', 'wK', 'wP', 'bR', 'bN', 'bB', 'bQ', 'bK', 'bP']
     images = {}
     for piece_im in pieces_im:
-        images[piece_im] = pygame.transform.scale(pygame.image.load(f"images/{piece_im}.png"), (square_size, square_size))
+        images[piece_im] = pygame.transform.scale(pygame.image.load(f"../images/{piece_im}.png"), (square_size, square_size))
     return images
 
 def get_square_at_pos(pos, square_size):
